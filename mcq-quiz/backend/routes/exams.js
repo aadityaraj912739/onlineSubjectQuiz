@@ -67,7 +67,6 @@ router.post('/', auth, isTeacher, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Create exam error:', error);
         res.status(500).json({ message: 'Server error while creating exam' });
     }
 });
@@ -101,7 +100,6 @@ router.get('/teacher', auth, isTeacher, async (req, res) => {
 
         res.json({ exams: examsWithStats });
     } catch (error) {
-        console.error('Get teacher exams error:', error);
         res.status(500).json({ message: 'Server error while fetching exams' });
     }
 });
@@ -128,7 +126,6 @@ router.get('/available', auth, isStudent, async (req, res) => {
 
         res.json(examsForStudent);
     } catch (error) {
-        console.error('Get available exams error:', error);
         res.status(500).json({ message: 'Server error while fetching available exams' });
     }
 });
@@ -160,7 +157,6 @@ router.get('/:id', auth, async (req, res) => {
 
         res.json({ exam: examData });
     } catch (error) {
-        console.error('Get exam error:', error);
         res.status(500).json({ message: 'Server error while fetching exam' });
     }
 });
@@ -224,7 +220,6 @@ router.get('/key/:examKey', auth, isStudent, async (req, res) => {
 
         res.json({ exam: examData });
     } catch (error) {
-        console.error('Get exam by key error:', error);
         res.status(500).json({ message: 'Server error while fetching exam' });
     }
 });
@@ -274,7 +269,6 @@ router.put('/:id', auth, isTeacher, async (req, res) => {
             exam: updatedExam
         });
     } catch (error) {
-        console.error('Update exam error:', error);
         res.status(500).json({ message: 'Server error while updating exam' });
     }
 });
@@ -303,7 +297,6 @@ router.delete('/:id', auth, isTeacher, async (req, res) => {
 
         res.json({ message: 'Exam deleted successfully' });
     } catch (error) {
-        console.error('Delete exam error:', error);
         res.status(500).json({ message: 'Server error while deleting exam' });
     }
 });
@@ -342,7 +335,6 @@ router.post('/join', auth, isStudent, async (req, res) => {
         res.json({ examId: exam._id });
 
     } catch (error) {
-        console.error('Join exam by key error:', error);
         res.status(500).json({ message: 'Server error while trying to join the exam.' });
     }
 });
@@ -403,28 +395,7 @@ router.get('/:id/questions', auth, isStudent, async (req, res) => {
 
         res.json(examData);
     } catch (error) {
-        console.error('Get exam questions error:', error);
         res.status(500).json({ message: 'Server error while fetching exam questions' });
-    }
-});
-
-// @route   GET /api/exams/test-data
-// @desc    Get all exams for testing (temporary route)
-// @access  Public
-router.get('/test-data', async (req, res) => {
-    try {
-        const exams = await Exam.find({})
-            .populate('teacher', 'name email')
-            .sort({ createdAt: -1 });
-        
-        res.json({
-            message: 'All exams data',
-            count: exams.length,
-            exams: exams
-        });
-    } catch (error) {
-        console.error('Get test data error:', error);
-        res.status(500).json({ message: 'Server error' });
     }
 });
 

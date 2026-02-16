@@ -99,7 +99,6 @@ router.post('/submit', auth, isStudent, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Submit exam error:', error);
         res.status(500).json({ message: 'Server error while submitting exam' });
     }
 });
@@ -115,7 +114,6 @@ router.get('/my-results', auth, isStudent, async (req, res) => {
 
         res.json(results);
     } catch (error) {
-        console.error('Get student results error:', error);
         res.status(500).json({ message: 'Server error while fetching results' });
     }
 });
@@ -148,7 +146,6 @@ router.get('/student/summary', auth, isStudent, async (req, res) => {
             averageScore,
         });
     } catch (error) {
-        console.error('Get student summary error:', error);
         res.status(500).json({ message: 'Server error while fetching student summary' });
     }
 });
@@ -171,7 +168,6 @@ router.get('/my-result/:examId', auth, isStudent, async (req, res) => {
 
         res.json({ results: [result], exam });
     } catch (error) {
-        console.error('Get student exam result error:', error);
         res.status(500).json({ message: 'Server error while fetching your exam result' });
     }
 });
@@ -206,7 +202,6 @@ router.get('/exam/:examId', auth, isTeacher, async (req, res) => {
 
         res.json({ results: updatedResults, exam: { title: exam.title, subject: exam.subject, totalMarks: exam.totalMarks } });
     } catch (error) {
-        console.error('Get exam results error:', error);
         res.status(500).json({ message: 'Server error while fetching exam results' });
     }
 });
@@ -252,7 +247,6 @@ router.get('/ranking/:examId', auth, isTeacher, async (req, res) => {
             totalStudents: results.length
         });
     } catch (error) {
-        console.error('Get ranking error:', error);
         res.status(500).json({ message: 'Server error while fetching ranking' });
     }
 });
@@ -310,7 +304,6 @@ router.get('/detailed/:resultId', auth, async (req, res) => {
 
         res.json({ result: detailedResult });
     } catch (error) {
-        console.error('Get detailed result error:', error);
         res.status(500).json({ message: 'Server error while fetching detailed result' });
     }
 });
@@ -339,7 +332,7 @@ async function calculateRanks(examId) {
             await Result.findByIdAndUpdate(result._id, { $set: { rank: rank } });
         }
     } catch (error) {
-        console.error(`Error calculating ranks for exam ${examId}:`, error);
+        // Error calculating ranks
     }
 }
 

@@ -25,7 +25,7 @@ const ExamResults = () => {
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch results.');
-        console.error('Fetch results error:', err);
+        // Fetch results error
       } finally {
         setLoading(false);
       }

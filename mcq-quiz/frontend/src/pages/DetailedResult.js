@@ -20,7 +20,7 @@ const DetailedResult = () => {
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch detailed result.');
-        console.error('Fetch detailed result error:', err);
+        // Fetch detailed result error
       } finally {
         setLoading(false);
       }

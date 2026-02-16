@@ -58,7 +58,6 @@ router.post('/register', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Registration error:', error);
         res.status(500).json({ message: 'Server error during registration' });
     }
 });
@@ -102,7 +101,6 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ message: 'Server error during login' });
     }
 });
@@ -128,7 +126,6 @@ router.get('/me', auth, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get user error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -178,7 +175,7 @@ router.put('/profile', auth, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Profile update error:', error);
+
         res.status(500).json({ message: 'Server error during profile update' });
     }
 });

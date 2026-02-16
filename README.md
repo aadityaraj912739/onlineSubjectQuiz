@@ -2,6 +2,10 @@
 
 A full-stack MERN (MongoDB, Express.js, React.js, Node.js) application for conducting MCQ exams with separate dashboards for teachers and students.
 
+## 🚀 Live Demo
+
+**[View Live Application](https://college-project-roan.vercel.app/login)** - Deployed on Vercel
+
 ## Features
 
 ### Teacher Dashboard

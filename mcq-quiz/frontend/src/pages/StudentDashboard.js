@@ -31,7 +31,7 @@ const StudentDashboard = () => {
         setSummary(summaryRes.data);
 
       } catch (error) {
-        console.error('Failed to fetch student data:', error);
+        // Failed to fetch student data
       } finally {
         setLoading(false);
       }
@@ -81,7 +81,7 @@ const StudentDashboard = () => {
       const res = await api.post('/exams/join', { examKey });
       navigate(`/exam/${res.data.examId}`);
     } catch (error) {
-      console.error('Error joining exam by key:', error);
+      // Error joining exam by key
       alert(error.response?.data?.message || 'An error occurred while trying to join the exam.');
     }
   };

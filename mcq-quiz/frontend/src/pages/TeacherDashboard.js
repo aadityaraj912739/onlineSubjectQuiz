@@ -56,7 +56,7 @@ const TeacherDashboard = () => {
         averagePerformance: averagePerformance.toFixed(2),
       });
     } catch (error) {
-      console.error('Error fetching exams:', error);
+      // Error fetching exams
       toast.error('Failed to fetch exams. Please try again.');
     } finally {
       setLoading(false);
