@@ -1,6 +1,8 @@
 # McqQuiz - Online MCQ Exam Portal
 
-A full-stack MERN (MongoDB, Express.js, React.js, Node.js) application for conducting MCQ exams with separate dashboards for teachers and students.
+A full-stack MERN (MongoDB, Express.js, React.js, Node.js) application for conducting MCQ exams with separate dashboards for teachers and students. 
+
+🔗 **Live Demo:** [https://college-project-roan.vercel.app/login](https://college-project-roan.vercel.app/login)
 
 ## 🚀 Live Demo
 
