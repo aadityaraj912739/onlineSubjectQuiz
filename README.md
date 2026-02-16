@@ -1,5 +1,11 @@
 # McqQuiz - Online MCQ Exam Portal
 
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+
 A full-stack MERN (MongoDB, Express.js, React.js, Node.js) application for conducting MCQ exams with separate dashboards for teachers and students. **[Try it live →](https://college-project-roan.vercel.app/login)**
 
 ## 🚀 Live Demo
