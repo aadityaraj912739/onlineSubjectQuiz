@@ -124,8 +124,11 @@ collegeProject/
 5. **Access the application:**
    - Frontend: `http://localhost:3000`
    - Backend API: `http://localhost:5001`
+   - **Live Demo:** [https://college-project-roan.vercel.app/login](https://college-project-roan.vercel.app/login)
 
 ## Usage
+
+> **Try it live:** [https://college-project-roan.vercel.app/login](https://college-project-roan.vercel.app/login)
 
 ### For Teachers:
 1. Register as a teacher with your department information
@@ -173,3 +176,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 Aaditya Raj
 - GitHub: [@aadityaraj912739](https://github.com/aadityaraj912739)
+- Live Project: [https://college-project-roan.vercel.app/login](https://college-project-roan.vercel.app/login)
