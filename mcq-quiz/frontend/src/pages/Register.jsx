@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Loading from '../components/Loading';
+import { useAuth } from '../context/AuthContext.jsx';
+import Loading from '../components/Loading.jsx';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -108,10 +108,10 @@ const Register = () => {
           <div className="mx-auto h-16 w-16 bg-primary-600 rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-2xl">M</span>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Create your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
             Join McqQuiz as a teacher or student
           </p>
         </div>

@@ -54,6 +54,13 @@ const resultSchema = new mongoose.Schema({
         type: Number, // in seconds
         required: true
     },
+    setNumber: {
+        type: Number,
+        default: 1
+    },
+    questionOrder: [{
+        type: mongoose.Schema.Types.ObjectId
+    }],
     submittedAt: {
         type: Date,
         default: Date.now

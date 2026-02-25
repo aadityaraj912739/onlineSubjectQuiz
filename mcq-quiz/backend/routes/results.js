@@ -10,7 +10,7 @@ const router = express.Router();
 // @access  Private
 router.post('/submit', auth, isStudent, async (req, res) => {
     try {
-        const { examId, answers, timeTaken } = req.body;
+        const { examId, answers, timeTaken, setNumber, questionOrder } = req.body;
 
         // Check if exam exists
         const exam = await Exam.findById(examId);
@@ -53,13 +53,19 @@ router.post('/submit', auth, isStudent, async (req, res) => {
                 continue;
             }
 
-            const isCorrect = (answer.selectedOption !== null && question.options[answer.selectedOption]?.isCorrect) || false;
+            // Handle shuffled options - answer.selectedOption is the shuffled index
+            // answer.originalOptionIndex is the original position in the exam
+            const originalOptionIndex = answer.originalOptionIndex;
+            
+            const isCorrect = (originalOptionIndex !== null && 
+                              originalOptionIndex !== undefined && 
+                              question.options[originalOptionIndex]?.isCorrect) || false;
             const marks = isCorrect ? question.marks : 0;
             obtainedMarks += marks;
 
             processedAnswers.push({
                 questionId: answer.questionId,
-                selectedOption: answer.selectedOption,
+                selectedOption: originalOptionIndex, // Store original index
                 isCorrect,
                 marks
             });
@@ -72,7 +78,9 @@ router.post('/submit', auth, isStudent, async (req, res) => {
             answers: processedAnswers,
             totalMarks: exam.totalMarks,
             obtainedMarks,
-            timeTaken: timeTaken || 0
+            timeTaken: timeTaken || 0,
+            setNumber: setNumber || 1,
+            questionOrder: questionOrder || []
         });
 
         await result.save();

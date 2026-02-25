@@ -161,14 +161,14 @@ const CreateExam = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Exam</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Create New Exam</h1>
+          <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             Set up your MCQ exam with questions and options
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
           {/* Exam Details */}
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Exam Details</h2>

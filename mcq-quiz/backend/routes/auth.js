@@ -54,7 +54,12 @@ router.post('/register', async (req, res) => {
                 class: user.class,
                 linkedin: user.linkedin,
                 leetcode: user.leetcode,
-                github: user.github
+                github: user.github,
+                country: user.country,
+                state: user.state,
+                college: user.college,
+                branch: user.branch,
+                semester: user.semester
             }
         });
     } catch (error) {
@@ -97,7 +102,12 @@ router.post('/login', async (req, res) => {
                 class: user.class,
                 linkedin: user.linkedin,
                 leetcode: user.leetcode,
-                github: user.github
+                github: user.github,
+                country: user.country,
+                state: user.state,
+                college: user.college,
+                branch: user.branch,
+                semester: user.semester
             }
         });
     } catch (error) {
@@ -122,7 +132,12 @@ router.get('/me', auth, async (req, res) => {
                 profileImage: req.user.profileImage,
                 linkedin: req.user.linkedin,
                 leetcode: req.user.leetcode,
-                github: req.user.github
+                github: req.user.github,
+                country: req.user.country,
+                state: req.user.state,
+                college: req.user.college,
+                branch: req.user.branch,
+                semester: req.user.semester
             }
         });
     } catch (error) {
@@ -135,7 +150,7 @@ router.get('/me', auth, async (req, res) => {
 // @access  Private
 router.put('/profile', auth, async (req, res) => {
     try {
-        const { name, department, rollNumber, class: userClass, linkedin, leetcode, github } = req.body;
+        const { name, department, rollNumber, class: userClass, linkedin, leetcode, github, country, state, college, branch, semester } = req.body;
         const user = await User.findById(req.user._id);
 
         if (!user) {
@@ -149,11 +164,18 @@ router.put('/profile', auth, async (req, res) => {
         user.leetcode = typeof leetcode !== 'undefined' ? leetcode : user.leetcode;
         user.github = typeof github !== 'undefined' ? github : user.github;
 
+        // Location and academic details (applicable to both roles)
+        user.country = typeof country !== 'undefined' ? country : user.country;
+        user.state = typeof state !== 'undefined' ? state : user.state;
+        user.college = typeof college !== 'undefined' ? college : user.college;
+        user.branch = typeof branch !== 'undefined' ? branch : user.branch;
+
         if (user.role === 'teacher') {
             user.department = department || user.department;
         } else if (user.role === 'student') {
             user.rollNumber = rollNumber || user.rollNumber;
             user.class = userClass || user.class;
+            user.semester = typeof semester !== 'undefined' ? semester : user.semester;
         }
 
         await user.save();
@@ -171,7 +193,12 @@ router.put('/profile', auth, async (req, res) => {
                 profileImage: user.profileImage,
                 linkedin: user.linkedin,
                 leetcode: user.leetcode,
-                github: user.github
+                github: user.github,
+                country: user.country,
+                state: user.state,
+                college: user.college,
+                branch: user.branch,
+                semester: user.semester
             }
         });
     } catch (error) {

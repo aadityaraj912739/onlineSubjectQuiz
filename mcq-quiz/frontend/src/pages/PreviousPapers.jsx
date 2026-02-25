@@ -1,0 +1,607 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+import Loading from '../components/Loading.jsx';
+import toast from 'react-hot-toast';
+import { FaSearch, FaFilter, FaDownload, FaTrash, FaTimes, FaUpload } from 'react-icons/fa';
+
+const PreviousPapers = () => {
+  const { user, api } = useAuth();
+  const [papers, setPapers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(true); // Auto-show filters for students
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    country: '',
+    state: '',
+    college: '',
+    branch: '',
+    semester: '',
+    subject: '',
+    year: '',
+    search: ''
+  });
+  
+  // Available filter options
+  const [filterOptions, setFilterOptions] = useState({
+    countries: [],
+    states: [],
+    colleges: [],
+    branches: [],
+    semesters: [],
+    subjects: [],
+    years: []
+  });
+
+  const [formData, setFormData] = useState({
+    title: '',
+    subject: '',
+    year: new Date().getFullYear().toString(),
+    country: user?.country || '',
+    state: user?.state || '',
+    college: user?.college || '',
+    branch: user?.branch || '',
+    semester: user?.semester || ''
+  });
+
+  useEffect(() => {
+    fetchFilterOptions();
+    fetchPapers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Auto-populate form with user profile data
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        country: user.country || '',
+        state: user.state || '',
+        college: user.college || '',
+        branch: user.branch || '',
+        semester: user.semester || ''
+      }));
+      
+      // Auto-set filters for students based on their profile
+      if (user.role === 'student') {
+        setFilters({
+          country: user.country || '',
+          state: user.state || '',
+          college: user.college || '',
+          branch: user.branch || '',
+          semester: user.semester || '',
+          subject: '',
+          year: '',
+          search: ''
+        });
+      }
+    }
+  }, [user]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      const response = await api.get('/previous-papers/filters');
+      setFilterOptions(response.data);
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
+    }
+  };
+
+  const fetchPapers = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams();
+      
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) {
+          queryParams.append(key, filters[key]);
+        }
+      });
+
+      const response = await api.get(`/previous-papers?${queryParams.toString()}`);
+      setPapers(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch papers');
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPapers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size must be less than 10MB');
+        return;
+      }
+      if (!file.type.includes('pdf')) {
+        toast.error('Only PDF files are allowed');
+        return;
+      }
+      setSelectedFile(file);
+      toast.success(`Selected: ${file.name}`);
+    }
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    
+    if (!selectedFile) {
+      toast.error('Please select a PDF file');
+      return;
+    }
+
+    if (!formData.title || !formData.subject || !formData.year || 
+        !formData.country || !formData.state || !formData.college || 
+        !formData.branch || !formData.semester) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', selectedFile);
+      uploadFormData.append('title', formData.title);
+      uploadFormData.append('subject', formData.subject);
+      uploadFormData.append('year', formData.year);
+      uploadFormData.append('country', formData.country);
+      uploadFormData.append('state', formData.state);
+      uploadFormData.append('college', formData.college);
+      uploadFormData.append('branch', formData.branch);
+      uploadFormData.append('semester', formData.semester);
+
+      await api.post('/previous-papers/upload', uploadFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      toast.success('Paper uploaded successfully!');
+      setShowUploadForm(false);
+      setFormData({
+        title: '',
+        subject: '',
+        year: new Date().getFullYear().toString(),
+        country: user?.country || '',
+        state: user?.state || '',
+        college: user?.college || '',
+        branch: user?.branch || '',
+        semester: user?.semester || ''
+      });
+      setSelectedFile(null);
+      fetchPapers();
+      fetchFilterOptions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Upload failed');
+      console.error('Upload error:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownload = async (paper) => {
+    try {
+      // Increment download count
+      await api.put(`/previous-papers/${paper._id}/download`);
+      
+      // Open PDF in new tab
+      const fileUrl = `http://localhost:5001${paper.fileUrl}`;
+      window.open(fileUrl, '_blank');
+      
+      toast.success('Opening PDF...');
+    } catch (error) {
+      toast.error('Download failed');
+      console.error('Download error:', error);
+    }
+  };
+
+  const handleDelete = async (paperId) => {
+    if (!window.confirm('Are you sure you want to delete this paper?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/previous-papers/${paperId}`);
+      toast.success('Paper deleted successfully');
+      fetchPapers();
+    } catch (error) {
+      toast.error('Delete failed');
+      console.error('Delete error:', error);
+    }
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      country: user?.role === 'student' ? user.country || '' : '',
+      state: user?.role === 'student' ? user.state || '' : '',
+      college: user?.role === 'student' ? user.college || '' : '',
+      branch: user?.role === 'student' ? user.branch || '' : '',
+      semester: user?.role === 'student' ? user.semester || '' : '',
+      subject: '',
+      year: '',
+      search: ''
+    });
+  };
+
+  if (loading && papers.length === 0) {
+    return <Loading />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-950 py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Previous Year Question Papers
+            </h1>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+              {user?.role === 'teacher' ? 'Upload and manage' : 'Search and download'} previous papers
+            </p>
+          </div>
+          
+          {user?.role === 'teacher' && (
+            <button
+              onClick={() => setShowUploadForm(!showUploadForm)}
+              className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md text-sm md:text-base"
+            >
+              <FaUpload />
+              {showUploadForm ? 'Cancel' : 'Upload Paper'}
+            </button>
+          )}
+        </div>
+
+        {/* Profile completion warning for students */}
+        {user?.role === 'student' && (!user?.country || !user?.state || !user?.college || !user?.branch || !user?.semester) && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <span className="text-yellow-600 dark:text-yellow-400 text-xl">⚠️</span>
+              <div>
+                <p className="text-sm md:text-base text-yellow-800 dark:text-yellow-300 font-medium">
+                  Complete your profile for better results!
+                </p>
+                <p className="text-xs md:text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                  Add your Country, State, College, Branch, and Semester in your profile to see relevant papers automatically.
+                </p>
+                <Link 
+                  to="/profile" 
+                  className="inline-block mt-2 text-xs md:text-sm text-yellow-900 dark:text-yellow-200 underline hover:no-underline font-medium"
+                >
+                  Update Profile →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upload Form (Teacher Only) */}
+        {showUploadForm && user?.role === 'teacher' && (
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 mb-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Upload Previous Paper
+            </h2>
+            <form onSubmit={handleUpload} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Paper Title *"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Subject *"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Year *"
+                  value={formData.year}
+                  onChange={(e) => setFormData({...formData, year: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Country *"
+                  value={formData.country}
+                  onChange={(e) => setFormData({...formData, country: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="State/Province *"
+                  value={formData.state}
+                  onChange={(e) => setFormData({...formData, state: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="College/University *"
+                  value={formData.college}
+                  onChange={(e) => setFormData({...formData, college: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Branch (e.g., CSE, ECE) *"
+                  value={formData.branch}
+                  onChange={(e) => setFormData({...formData, branch: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Semester (e.g., 1, 2, 3) *"
+                  value={formData.semester}
+                  onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  required
+                />
+              </div>
+
+              <div className="border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-lg p-4 md:p-6 text-center">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label 
+                  htmlFor="file-upload" 
+                  className="cursor-pointer flex flex-col items-center"
+                >
+                  <FaUpload className="text-3xl md:text-4xl text-gray-400 mb-2" />
+                  <span className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                    {selectedFile ? selectedFile.name : 'Click to select PDF file (Max 10MB)'}
+                  </span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={uploading || !selectedFile}
+                className="w-full py-2 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium"
+              >
+                {uploading ? 'Uploading...' : 'Upload Paper'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Filters Section */}
+        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <FaFilter />
+              Search & Filter Papers
+            </h2>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-sm md:text-base text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </button>
+          </div>
+
+          {/* Auto-filter indicator for students */}
+          {user?.role === 'student' && (user?.country || user?.state || user?.college || user?.branch || user?.semester) && (
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                <span className="font-semibold">✓ Auto-filtered:</span> Papers matching your profile ({user?.country}{user?.state ? `, ${user.state}` : ''}{user?.college ? `, ${user.college}` : ''}{user?.branch ? `, ${user.branch}` : ''}{user?.semester ? `, Semester ${user.semester}` : ''})
+              </p>
+            </div>
+          )}
+
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by title or subject..."
+              value={filters.search}
+              onChange={(e) => setFilters({...filters, search: e.target.value})}
+              className="w-full pl-12 pr-4 py-2 md:py-3 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+            />
+          </div>
+
+          {/* Filter Dropdowns */}
+          {showFilters && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <select
+                  value={filters.country}
+                  onChange={(e) => setFilters({...filters, country: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Countries</option>
+                  {filterOptions.countries.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.state}
+                  onChange={(e) => setFilters({...filters, state: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All States</option>
+                  {filterOptions.states.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.college}
+                  onChange={(e) => setFilters({...filters, college: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Colleges</option>
+                  {filterOptions.colleges.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.branch}
+                  onChange={(e) => setFilters({...filters, branch: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Branches</option>
+                  {filterOptions.branches.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.semester}
+                  onChange={(e) => setFilters({...filters, semester: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Semesters</option>
+                  {filterOptions.semesters.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.subject}
+                  onChange={(e) => setFilters({...filters, subject: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Subjects</option>
+                  {filterOptions.subjects.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.year}
+                  onChange={(e) => setFilters({...filters, year: e.target.value})}
+                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                >
+                  <option value="">All Years</option>
+                  {filterOptions.years.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-gray-200 dark:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                >
+                  <FaTimes />
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Papers Grid */}
+        <div className="mb-4">
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+            Found {papers.length} paper{papers.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+
+        {papers.length === 0 ? (
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-8 md:p-12 text-center">
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
+              No papers found matching your filters.
+            </p>
+            <button
+              onClick={clearFilters}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {papers.map(paper => (
+              <div
+                key={paper._id}
+                className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white pr-2">
+                    {paper.title}
+                  </h3>
+                  {user?.role === 'teacher' && paper.teacher._id === user.id && (
+                    <button
+                      onClick={() => handleDelete(paper._id)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                      title="Delete"
+                    >
+                      <FaTrash className="text-sm md:text-base" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2 mb-4 text-xs md:text-sm">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                      {paper.subject}
+                    </span>
+                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                      Year: {paper.year}
+                    </span>
+                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                      Sem: {paper.semester}
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <strong>Branch:</strong> {paper.branch}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <strong>College:</strong> {paper.college}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <strong>Location:</strong> {paper.state}, {paper.country}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <strong>Uploaded by:</strong> {paper.teacher.name}
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Downloads: {paper.downloadCount}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleDownload(paper)}
+                  className="w-full py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all flex items-center justify-center gap-2 text-sm md:text-base"
+                >
+                  <FaDownload />
+                  Download PDF
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PreviousPapers;

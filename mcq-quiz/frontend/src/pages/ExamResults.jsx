@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import Loading from '../components/Loading';
-import { useAuth } from '../context/AuthContext';
+import Loading from '../components/Loading.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const ExamResults = () => {
   const { examId } = useParams();
@@ -34,6 +37,80 @@ const ExamResults = () => {
     fetchResults();
   }, [examId, user.role, api]);
 
+  const downloadExcel = () => {
+    if (!results || results.length === 0) return;
+
+    const data = results.map((result, index) => ({
+      'Rank': result.rank || index + 1,
+      'Student Name': result.student?.name || 'N/A',
+      'Roll Number': result.student?.rollNumber || 'N/A',
+      'Score': `${result.obtainedMarks}/${result.totalMarks}`,
+      'Percentage': `${result.percentage.toFixed(2)}%`,
+      'Time Taken': `${Math.floor(result.timeTaken / 60)}m ${result.timeTaken % 60}s`,
+      'Set Number': result.setNumber || 1,
+      'Submitted At': new Date(result.submittedAt).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 6 },  // Rank
+      { wch: 20 }, // Student Name
+      { wch: 15 }, // Roll Number
+      { wch: 10 }, // Score
+      { wch: 12 }, // Percentage
+      { wch: 15 }, // Time Taken
+      { wch: 10 }, // Set Number
+      { wch: 20 }  // Submitted At
+    ];
+
+    const fileName = `${exam?.title || 'Exam'}_Results_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
+  const downloadPDF = () => {
+    if (!results || results.length === 0) return;
+
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text(exam?.title || 'Exam Results', 14, 20);
+    
+    // Add exam info
+    doc.setFontSize(11);
+    doc.text(`Subject: ${exam?.subject || 'N/A'}`, 14, 30);
+    doc.text(`Total Students: ${results.length}`, 14, 37);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 44);
+
+    // Prepare table data
+    const tableData = results.map(result => [
+      result.rank || '-',
+      result.student?.name || 'N/A',
+      result.student?.rollNumber || 'N/A',
+      `${result.obtainedMarks}/${result.totalMarks}`,
+      `${result.percentage.toFixed(2)}%`,
+      `${Math.floor(result.timeTaken / 60)}m ${result.timeTaken % 60}s`,
+      `Set ${result.setNumber || 1}`
+    ]);
+
+    // Add table
+    doc.autoTable({
+      head: [['Rank', 'Student', 'Roll No', 'Score', '%', 'Time', 'Set']],
+      body: tableData,
+      startY: 50,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [59, 130, 246] },
+      alternateRowStyles: { fillColor: [245, 247, 250] }
+    });
+
+    const fileName = `${exam?.title || 'Exam'}_Results_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-950 flex items-center justify-center">
@@ -46,7 +123,7 @@ const ExamResults = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-950 flex items-center justify-center text-center">
         <div>
-          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
           <p className="text-gray-600 dark:text-gray-400">{error}</p>
           <Link to={user?.role === 'teacher' ? "/teacher" : "/student"} className="btn-primary mt-6">
             Back to Dashboard
@@ -58,17 +135,43 @@ const ExamResults = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Link to={user?.role === 'teacher' ? "/teacher" : "/student"} className="text-sm text-primary-600 dark:text-primary-400 hover:underline mb-4 inline-block">
+      <div className="max-w-7xl mx-auto py-6 md:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 md:mb-8">
+          <Link to={user?.role === 'teacher' ? "/teacher" : "/student"} className="text-xs md:text-sm text-primary-600 dark:text-primary-400 hover:underline mb-4 inline-block">
             &larr; Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Results for: {exam?.title}
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            {exam?.subject}
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Results for: {exam?.title}
+              </h1>
+              <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
+                {exam?.subject}
+              </p>
+            </div>
+            {results.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                <button
+                  onClick={downloadExcel}
+                  className="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-md text-sm md:text-base">
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Excel
+                </button>
+                <button
+                  onClick={downloadPDF}
+                  className="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-md text-sm md:text-base"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  PDF
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {results.length === 0 ? (

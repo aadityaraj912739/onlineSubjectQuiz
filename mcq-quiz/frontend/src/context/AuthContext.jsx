@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     try {
       const response = await axios.post('/auth/login', { email, password });
       const { token: newToken, user: userData } = response.data;
@@ -59,9 +59,9 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     }
-  };
+  }, []);
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     try {
       const response = await axios.post('/auth/register', userData);
       const { token: newToken, user: newUser } = response.data;
@@ -78,17 +78,17 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
     toast.success('Logged out successfully');
-  };
+  }, []);
 
-  const updateProfile = async (profileData) => {
+  const updateProfile = useCallback(async (profileData) => {
     try {
       const response = await axios.put('/auth/profile', profileData);
       setUser(response.data.user);
@@ -99,9 +99,9 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     }
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     token,
@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     api: axios, // Export the configured axios instance
-  };
+  }), [user, loading, token, login, register, logout, updateProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

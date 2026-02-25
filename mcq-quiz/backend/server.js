@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 const detect = require('detect-port').default;
 
 // Check for JWT_SECRET
@@ -21,6 +22,9 @@ app.use(cors({
     ],
     credentials: true
 }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
 const connectDB = async () => {
@@ -43,6 +47,8 @@ connectDB();
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/results', require('./routes/results'));
+app.use('/api/study-materials', require('./routes/studyMaterials'));
+app.use('/api/previous-papers', require('./routes/previousPapers'));
 
 // Basic route
 app.get('/', (req, res) => {

@@ -40,6 +40,23 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // Common fields for both
+    country: {
+        type: String,
+        default: ''
+    },
+    state: {
+        type: String,
+        default: ''
+    },
+    college: {
+        type: String,
+        default: ''
+    },
+    branch: {
+        type: String,
+        default: ''
+    },
     // For teachers
     department: {
         type: String,
@@ -55,6 +72,12 @@ const userSchema = new mongoose.Schema({
         }
     },
     class: {
+        type: String,
+        required: function() {
+            return this.role === 'student';
+        }
+    },
+    semester: {
         type: String,
         required: function() {
             return this.role === 'student';

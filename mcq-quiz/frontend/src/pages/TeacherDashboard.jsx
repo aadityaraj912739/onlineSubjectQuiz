@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import Loading from '../components/Loading';
+import Loading from '../components/Loading.jsx';
 import { formatRelativeTime, getExamStatus } from '../utils/helpers';
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -77,17 +78,17 @@ const TeacherDashboard = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Welcome back, {user?.name}
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             Manage your exams and track student performance
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <div className="card">
             <div className="flex items-center">
               <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20">
@@ -96,8 +97,8 @@ const TeacherDashboard = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Exams</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalExams}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Exams</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.totalExams}</p>
               </div>
             </div>
           </div>
@@ -110,8 +111,8 @@ const TeacherDashboard = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Exams</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeExams}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Active Exams</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.activeExams}</p>
               </div>
             </div>
           </div>
@@ -124,8 +125,8 @@ const TeacherDashboard = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Participants</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalParticipants}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Participants</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.totalParticipants}</p>
               </div>
             </div>
           </div>
@@ -139,11 +140,51 @@ const TeacherDashboard = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Performance</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.averagePerformance}%</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Performance</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.averagePerformance}%</p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick Access Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <button
+            onClick={() => navigate('/create-exam')}
+            className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center space-x-4">
+              <span className="text-4xl">➕</span>
+              <div className="text-left">
+                <h3 className="text-xl font-bold">Create New Exam</h3>
+                <p className="text-primary-100 text-sm">Design and publish a new exam</p>
+              </div>
+            </div>
+          </button>
+          <button
+            onClick={() => navigate('/study-materials')}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center space-x-4">
+              <span className="text-4xl">📚</span>
+              <div className="text-left">
+                <h3 className="text-xl font-bold">Study Materials</h3>
+                <p className="text-blue-100 text-sm">Upload notes, PDFs & suggestions</p>
+              </div>
+            </div>
+          </button>
+          <button
+            onClick={() => navigate('/previous-papers')}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+          >
+            <div className="flex items-center space-x-4">
+              <span className="text-4xl">📄</span>
+              <div className="text-left">
+                <h3 className="text-xl font-bold">Previous Papers</h3>
+                <p className="text-purple-100 text-sm">Upload question papers by location</p>
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* Exams Table */}

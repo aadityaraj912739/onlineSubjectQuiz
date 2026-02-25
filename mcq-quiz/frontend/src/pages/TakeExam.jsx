@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
 
 const TakeExam = () => {
@@ -16,6 +16,7 @@ const TakeExam = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [examStartTime] = useState(new Date());
+  const [setNumber, setSetNumber] = useState(1);
 
   useEffect(() => {
     fetchExamQuestions();
@@ -38,6 +39,7 @@ const TakeExam = () => {
       });
       
       setExam(response.data);
+      setSetNumber(response.data.setNumber || 1);
       setTimeLeft(response.data.duration * 60); // Convert minutes to seconds
       
       // Initialize answers object
@@ -71,16 +73,28 @@ const TakeExam = () => {
       const token = localStorage.getItem('token');
       const timeTaken = Math.floor((new Date() - examStartTime) / 1000); // in seconds
       
-      // Convert answers to format expected by backend
-      const formattedAnswers = exam.questions.map((question, index) => ({
-        questionId: question._id,
-        selectedOption: answers[index]
-      }));
+      // Convert answers to format expected by backend with original indices
+      const formattedAnswers = exam.questions.map((question, index) => {
+        const selectedOptionIndex = answers[index];
+        const originalOptionIndex = selectedOptionIndex !== null 
+          ? question.options[selectedOptionIndex].originalIndex 
+          : null;
+        
+        return {
+          questionId: question._id,
+          selectedOption: selectedOptionIndex, // Shuffled index (for display reference)
+          originalOptionIndex: originalOptionIndex // Original index (for validation)
+        };
+      });
+
+      const questionOrder = exam.questions.map(q => q._id);
 
       const response = await axios.post('http://localhost:5001/api/results/submit', {
         examId: exam._id,
         answers: formattedAnswers,
-        timeTaken: timeTaken
+        timeTaken: timeTaken,
+        setNumber: setNumber,
+        questionOrder: questionOrder
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -128,7 +142,7 @@ const TakeExam = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-950 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Exam Not Found</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">Exam Not Found</h2>
           <button 
             onClick={() => navigate('/student')}
             className="px-4 py-2 bg-leetcode-orange text-white rounded-lg hover:bg-orange-600"
@@ -149,18 +163,23 @@ const TakeExam = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{exam.title}</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{exam.subject}</p>
+              <div className="flex items-center gap-2 md:gap-3">
+                <h1 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white">{exam.title}</h1>
+                <span className="px-2 md:px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs md:text-sm font-semibold rounded-full shadow-md whitespace-nowrap">
+                  Set {setNumber}
+                </span>
+              </div>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{exam.subject}</p>
             </div>
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3 md:space-x-6">
               <div className="text-center">
-                <div className={`text-2xl font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-leetcode-orange'}`}>
+                <div className={`text-lg md:text-xl lg:text-2xl font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-leetcode-orange'}`}>
                   {formatTime(timeLeft)}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Time Left</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
                   {getAnsweredQuestionsCount()}/{exam.questions.length}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Answered</div>
@@ -170,12 +189,11 @@ const TakeExam = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8">
           {/* Question Panel */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 p-6">
-              <div className="mb-6">
+            <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 p-4 md:p-6">\n              <div className="mb-4 md:mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Question {currentQuestion + 1} of {exam.questions.length}

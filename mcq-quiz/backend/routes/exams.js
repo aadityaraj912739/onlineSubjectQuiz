@@ -5,6 +5,37 @@ const { auth, isTeacher, isStudent } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Seeded random number generator for deterministic shuffling
+function seededRandom(seed) {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+// Shuffle array deterministically based on seed
+function seededShuffle(array, seed) {
+    const shuffled = [...array];
+    let currentSeed = seed;
+    
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(currentSeed) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        currentSeed++;
+    }
+    
+    return shuffled;
+}
+
+// Generate set number from student ID (1-10)
+function generateSetNumber(studentId) {
+    const id = studentId.toString();
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash = hash & hash;
+    }
+    return (Math.abs(hash) % 10) + 1;
+}
+
 // @route   POST /api/exams
 // @desc    Create new exam (Teacher only)
 // @access  Private
@@ -370,7 +401,122 @@ router.get('/:id/questions', auth, isStudent, async (req, res) => {
             return res.status(400).json({ message: 'You have already taken this exam' });
         }
 
-        // Remove correct answers and send only questions
+        // Generate set number based on student ID
+        const setNumber = generateSetNumber(req.user._id);
+        
+        // Create seed from student ID and exam ID for deterministic randomization
+        const seed = parseInt(req.user._id.toString().slice(-8), 16) + parseInt(exam._id.toString().slice(-8), 16);
+        
+        // Shuffle questions
+        const questionsWithIndex = exam.questions.map((q, idx) => ({ question: q, originalIndex: idx }));
+        const shuffledQuestions = seededShuffle(questionsWithIndex, seed);
+        
+        // Remove correct answers and shuffle options for each question
+        const examData = {
+            _id: exam._id,
+            title: exam.title,
+            subject: exam.subject,
+            description: exam.description,
+            duration: exam.duration,
+            totalMarks: exam.totalMarks,
+            startTime: exam.startTime,
+            endTime: exam.endTime,
+            teacher: exam.teacher,
+            setNumber: setNumber,
+            questions: shuffledQuestions.map((item, qIdx) => {
+                const q = item.question;
+                
+                // Shuffle options for this question
+                const optionsWithIndex = q.options.map((opt, idx) => ({ 
+                    option: opt, 
+                    originalIndex: idx 
+                }));
+                const shuffledOptions = seededShuffle(optionsWithIndex, seed + qIdx);
+                
+                return {
+                    _id: q._id,
+                    question: q.question,
+                    options: shuffledOptions.map(item => ({
+                        _id: item.option._id,
+                        text: item.option.text,
+                        originalIndex: item.originalIndex // Send original index for answer validation
+                    })),
+                    marks: q.marks
+                };
+            })
+        };
+
+        res.json(examData);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error while fetching exam questions' });
+    }
+});
+
+// @route   GET /api/exams/previous-papers
+// @desc    Get expired exams as previous papers with teacher info
+// @access  Private
+router.get('/previous-papers', auth, async (req, res) => {
+    try {
+        const now = new Date();
+        
+        // Find all expired exams
+        const previousExams = await Exam.find({
+            endTime: { $lt: now },
+            isActive: true
+        })
+            .populate('teacher', 'name email')
+            .select('title subject description startTime endTime duration totalMarks teacher createdAt')
+            .sort({ endTime: -1 })
+            .limit(50); // Limit to 50 most recent
+
+        // Get result count for each exam
+        const examsWithStats = await Promise.all(previousExams.map(async (exam) => {
+            const resultCount = await Result.countDocuments({ exam: exam._id });
+            const avgScore = await Result.aggregate([
+                { $match: { exam: exam._id } },
+                { $group: { _id: null, averagePercentage: { $avg: '$percentage' } } }
+            ]);
+
+            return {
+                _id: exam._id,
+                title: exam.title,
+                subject: exam.subject,
+                description: exam.description,
+                startTime: exam.startTime,
+                endTime: exam.endTime,
+                duration: exam.duration,
+                totalMarks: exam.totalMarks,
+                teacher: exam.teacher,
+                createdAt: exam.createdAt,
+                totalStudents: resultCount,
+                averageScore: avgScore.length > 0 ? avgScore[0].averagePercentage.toFixed(2) : 0
+            };
+        }));
+
+        res.json(examsWithStats);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error while fetching previous papers' });
+    }
+});
+
+// @route   GET /api/exams/previous-papers/:id/view
+// @desc    View previous paper questions (for practice)
+// @access  Private
+router.get('/previous-papers/:id/view', auth, async (req, res) => {
+    try {
+        const exam = await Exam.findById(req.params.id)
+            .populate('teacher', 'name email');
+
+        if (!exam) {
+            return res.status(404).json({ message: 'Exam not found' });
+        }
+
+        const now = new Date();
+        if (now < exam.endTime) {
+            return res.status(400).json({ message: 'This exam is still active and cannot be viewed as a previous paper' });
+        }
+
+        // Return full exam with correct answers for practice
         const examData = {
             _id: exam._id,
             title: exam.title,
@@ -386,8 +532,8 @@ router.get('/:id/questions', auth, isStudent, async (req, res) => {
                 question: q.question,
                 options: q.options.map(opt => ({
                     _id: opt._id,
-                    text: opt.text
-                    // Don't include isCorrect
+                    text: opt.text,
+                    isCorrect: opt.isCorrect // Include correct answers for practice
                 })),
                 marks: q.marks
             }))
@@ -395,7 +541,7 @@ router.get('/:id/questions', auth, isStudent, async (req, res) => {
 
         res.json(examData);
     } catch (error) {
-        res.status(500).json({ message: 'Server error while fetching exam questions' });
+        res.status(500).json({ message: 'Server error while fetching previous paper' });
     }
 });
 
