@@ -71,10 +71,6 @@ const StudentDashboard = () => {
     setExamKey('');
   };
 
-  const startExam = (examId) => {
-    navigate(`/exam/${examId}`);
-  };
-
   const joinExamByKey = async () => {
     if (!examKey.trim()) {
       alert('Please enter an exam key.');

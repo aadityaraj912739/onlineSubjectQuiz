@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import Loading from '../components/Loading.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import * as XLSX from 'xlsx';

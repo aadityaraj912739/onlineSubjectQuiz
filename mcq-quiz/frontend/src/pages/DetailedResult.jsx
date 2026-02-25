@@ -124,9 +124,6 @@ const DetailedResult = () => {
     // Questions table
     const tableData = (result.answers || []).map((answer, index) => {
       const question = result.exam?.questions?.[index];
-      const selectedOption = question?.options?.[answer.selectedOption];
-      const correctOption = question?.options?.find(opt => opt.isCorrect);
-
       return [
         index + 1,
         question?.question?.substring(0, 60) + (question?.question?.length > 60 ? '...' : '') || 'N/A',

@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
 
 const TakeExam = () => {
   const { examId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { api } = useAuth();
   
   const [exam, setExam] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -18,85 +17,30 @@ const TakeExam = () => {
   const [examStartTime] = useState(new Date());
   const [setNumber, setSetNumber] = useState(1);
 
-  useEffect(() => {
-    fetchExamQuestions();
-  }, [examId]);
-
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && exam) {
-      handleSubmitExam();
-    }
-  }, [timeLeft, exam]);
-
-  const fetchExamQuestions = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5001/api/exams/${examId}/questions`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      setExam(response.data);
-      setSetNumber(response.data.setNumber || 1);
-      setTimeLeft(response.data.duration * 60); // Convert minutes to seconds
-      
-      // Initialize answers object
-      const initialAnswers = {};
-      response.data.questions.forEach((_, index) => {
-        initialAnswers[index] = null;
-      });
-      setAnswers(initialAnswers);
-      
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to load exam');
-      navigate('/student');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAnswerSelect = (questionIndex, optionIndex) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionIndex]: optionIndex
-    }));
-  };
-
-  const handleSubmitExam = async () => {
+  const handleSubmitExam = useCallback(async () => {
     if (submitting) return;
     
     setSubmitting(true);
     
     try {
-      const token = localStorage.getItem('token');
       const timeTaken = Math.floor((new Date() - examStartTime) / 1000); // in seconds
       
-      // Convert answers to format expected by backend with original indices
       const formattedAnswers = exam.questions.map((question, index) => {
         const selectedOptionIndex = answers[index];
-        const originalOptionIndex = selectedOptionIndex !== null 
-          ? question.options[selectedOptionIndex].originalIndex 
-          : null;
-        
         return {
           questionId: question._id,
-          selectedOption: selectedOptionIndex, // Shuffled index (for display reference)
-          originalOptionIndex: originalOptionIndex // Original index (for validation)
+          selectedOption: selectedOptionIndex,
         };
       });
 
       const questionOrder = exam.questions.map(q => q._id);
 
-      const response = await axios.post('http://localhost:5001/api/results/submit', {
+      const response = await api.post('/results/submit', {
         examId: exam._id,
         answers: formattedAnswers,
         timeTaken: timeTaken,
         setNumber: setNumber,
         questionOrder: questionOrder
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       toast.success('Exam submitted successfully!');
@@ -110,6 +54,48 @@ const TakeExam = () => {
       toast.error(error.response?.data?.message || 'Failed to submit exam');
       setSubmitting(false);
     }
+  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate]);
+
+  const fetchExamQuestions = useCallback(async () => {
+    try {
+      const response = await api.get(`/exams/${examId}/questions`);
+      
+      setExam(response.data);
+      setSetNumber(response.data.setNumber || 1);
+      setTimeLeft(response.data.duration * 60);
+      
+      const initialAnswers = {};
+      response.data.questions.forEach((_, index) => {
+        initialAnswers[index] = null;
+      });
+      setAnswers(initialAnswers);
+      
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load exam');
+      navigate('/student');
+    } finally {
+      setLoading(false);
+    }
+  }, [api, examId, navigate]);
+
+  useEffect(() => {
+    fetchExamQuestions();
+  }, [fetchExamQuestions]);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && exam) {
+      handleSubmitExam();
+    }
+  }, [timeLeft, exam, handleSubmitExam]);
+
+  const handleAnswerSelect = (questionIndex, optionIndex) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionIndex]: optionIndex
+    }));
   };
 
   const formatTime = (seconds) => {
@@ -193,7 +179,8 @@ const TakeExam = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8">
           {/* Question Panel */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 p-4 md:p-6">\n              <div className="mb-4 md:mb-6">
+            <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 p-4 md:p-6">
+              <div className="mb-4 md:mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Question {currentQuestion + 1} of {exam.questions.length}
