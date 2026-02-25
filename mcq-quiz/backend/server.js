@@ -37,7 +37,8 @@ const connectDB = async () => {
         console.log('MongoDB connected successfully');
     } catch (error) {
         console.error('MongoDB connection failed:', error);
-        process.exit(1);
+        console.error('Server will continue but database operations will fail.');
+        console.error('Please whitelist your IP in MongoDB Atlas Network Access settings.');
     }
 };
 
@@ -56,26 +57,21 @@ app.get('/', (req, res) => {
     res.json({ message: 'McqQuiz API is running!' });
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = parseInt(process.env.PORT) || 5001;
 
 const startServer = (port) => {
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);
+    }).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${port} is already in use, trying another port...`);
+            setTimeout(() => {
+                startServer(port + 1);
+            }, 1000);
+        } else {
+            console.error('Server error:', err);
+        }
     });
 };
 
-detect(PORT, (err, _port) => {
-    if (err) {
-        console.log('Error detecting port:', err);
-        // Fallback to default port if detection fails
-        startServer(PORT);
-        return;
-    }
-
-    if (PORT !== _port) {
-        console.log(`Port ${PORT} was occupied, using port ${_port} instead.`);
-        startServer(_port);
-    } else {
-        startServer(PORT);
-    }
-});
+startServer(PORT);
