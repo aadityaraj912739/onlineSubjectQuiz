@@ -44,16 +44,16 @@ const Navbar = () => {
       ];
 
   return (
-    <nav className="navbar sticky top-0 z-50 shadow-sm">
+    <nav className="navbar sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-lg">M</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
+                <span className="text-white font-bold text-xl">M</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-400 dark:to-primary-500 bg-clip-text text-transparent">
                 McqQuiz
               </span>
             </Link>
@@ -67,7 +67,7 @@ const Navbar = () => {
                 to={link.path}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
                   location.pathname === link.path
-                    ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
+                    ? 'bg-gradient-to-r from-primary-100 to-primary-50 dark:from-primary-900/30 dark:to-primary-800/20 text-primary-700 dark:text-primary-300 shadow-sm border border-primary-200 dark:border-primary-700'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-white'
                 }`}
                 aria-current={location.pathname === link.path ? 'page' : undefined}
@@ -85,13 +85,13 @@ const Navbar = () => {
             {/* Dark mode toggle */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="p-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-primary-50 hover:to-blue-50 dark:hover:from-dark-800 dark:hover:to-dark-750 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm hover:shadow-md"
               aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {darkMode ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -106,7 +106,7 @@ const Navbar = () => {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -125,12 +125,12 @@ const Navbar = () => {
             <div className="hidden md:block relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-2 text-sm bg-white dark:bg-dark-800 rounded-lg p-2 border border-gray-200 dark:border-dark-600 hover:bg-gray-50 dark:hover:bg-dark-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex items-center space-x-2 text-sm bg-white dark:bg-dark-850 rounded-lg p-2 border border-gray-200 dark:border-dark-600 hover:bg-gradient-to-br hover:from-gray-50 hover:to-primary-50 dark:hover:from-dark-800 dark:hover:to-dark-750 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm hover:shadow-md"
                 aria-expanded={isProfileOpen}
                 aria-haspopup="true"
               >
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-semibold text-sm">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>

@@ -76,23 +76,23 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-950 dark:to-dark-900 py-12 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-dark-950 dark:via-dark-925 dark:to-dark-900 py-12 px-4 sm:px-6 lg:px-8 animate-fadeIn">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-200">
+          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-glow transform hover:scale-110 transition-transform duration-300">
             <span className="text-white font-bold text-2xl">M</span>
           </div>
-          <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             Welcome Back!
           </h2>
-          <p className="mt-2 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
             Sign in to access your exam portal
           </p>
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6 bg-white dark:bg-dark-800 p-4 md:p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 bg-white/90 dark:bg-dark-850/90 backdrop-blur-xl p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-dark-700" onSubmit={handleSubmit}>
           {errors.submit && (
             <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded animate-fadeIn" role="alert">
               <div className="flex">
