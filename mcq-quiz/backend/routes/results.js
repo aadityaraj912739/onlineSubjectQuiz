@@ -107,7 +107,8 @@ router.post('/submit', auth, isStudent, async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error while submitting exam' });
+        console.error('Error submitting exam:', error);
+        res.status(500).json({ message: 'Server error while submitting exam', error: error.message });
     }
 });
 

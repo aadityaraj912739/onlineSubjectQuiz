@@ -27,9 +27,15 @@ const TakeExam = () => {
       
       const formattedAnswers = exam.questions.map((question, index) => {
         const selectedOptionIndex = answers[index];
+        // Get the originalIndex from the selected option
+        const originalOptionIndex = selectedOptionIndex !== null && selectedOptionIndex !== undefined
+          ? question.options[selectedOptionIndex]?.originalIndex
+          : null;
+        
         return {
           questionId: question._id,
           selectedOption: selectedOptionIndex,
+          originalOptionIndex: originalOptionIndex
         };
       });
 
