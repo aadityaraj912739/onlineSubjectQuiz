@@ -304,4 +304,42 @@ router.put('/:id/download', auth, async (req, res) => {
     }
 });
 
+// @route   GET /api/previous-papers/download/:id
+// @desc    Download a previous paper file with validation
+// @access  Private
+router.get('/download/:id', auth, async (req, res) => {
+    try {
+        const paper = await PreviousPaper.findById(req.params.id);
+
+        if (!paper) {
+            return res.status(404).json({ message: 'Previous paper not found in database' });
+        }
+
+        const filePath = path.join(__dirname, '..', paper.fileUrl);
+
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            console.error(`File not found: ${filePath}`);
+            return res.status(404).json({ 
+                message: 'File not found on server. This may occur after server restarts on cloud platforms.',
+                suggestion: 'Please contact the teacher to re-upload the file.'
+            });
+        }
+
+        // Increment download count
+        paper.downloadCount += 1;
+        await paper.save();
+
+        // Set headers for file download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${paper.fileName}"`);
+
+        // Send file
+        res.sendFile(filePath);
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        res.status(500).json({ message: 'Server error while downloading file' });
+    }
+});
+
 module.exports = router;
