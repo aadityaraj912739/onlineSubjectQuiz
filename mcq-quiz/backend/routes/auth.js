@@ -15,7 +15,7 @@ const generateToken = (userId) => {
 // @access  Public
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password, role, department, rollNumber, class: userClass, linkedin, leetcode, github } = req.body;
+        const { name, email, password, role, department, rollNumber, class: userClass, semester, linkedin, leetcode, github } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -32,6 +32,7 @@ router.post('/register', async (req, res) => {
         } else if (role === 'student') {
             userData.rollNumber = rollNumber;
             userData.class = userClass;
+            userData.semester = semester;
         }
 
         // Create new user
@@ -63,7 +64,8 @@ router.post('/register', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during registration' });
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Server error during registration', error: error.message });
     }
 });
 

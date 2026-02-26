@@ -14,7 +14,8 @@ const Register = () => {
     department: '',
     // Student fields
     rollNumber: '',
-    class: ''
+    class: '',
+    semester: ''
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -71,6 +72,9 @@ const Register = () => {
       }
       if (!formData.class.trim()) {
         newErrors.class = 'Class is required for students';
+      }
+      if (!formData.semester.trim()) {
+        newErrors.semester = 'Semester is required for students';
       }
     }
 
@@ -226,41 +230,61 @@ const Register = () => {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Roll Number
-                  </label>
-                  <input
-                    id="rollNumber"
-                    name="rollNumber"
-                    type="text"
-                    required
-                    value={formData.rollNumber}
-                    onChange={handleChange}
-                    className={`mt-1 input-field ${errors.rollNumber ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    placeholder="e.g., 2021001"
-                  />
-                  {errors.rollNumber && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.rollNumber}</p>
-                  )}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Roll Number
+                    </label>
+                    <input
+                      id="rollNumber"
+                      name="rollNumber"
+                      type="text"
+                      required
+                      value={formData.rollNumber}
+                      onChange={handleChange}
+                      className={`mt-1 input-field ${errors.rollNumber ? 'border-red-500 focus:ring-red-500' : ''}`}
+                      placeholder="e.g., 2021001"
+                    />
+                    {errors.rollNumber && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.rollNumber}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="class" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Class
+                    </label>
+                    <input
+                      id="class"
+                      name="class"
+                      type="text"
+                      required
+                      value={formData.class}
+                      onChange={handleChange}
+                      className={`mt-1 input-field ${errors.class ? 'border-red-500 focus:ring-red-500' : ''}`}
+                      placeholder="e.g., CSE-A"
+                    />
+                    {errors.class && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.class}</p>
+                    )}
+                  </div>
                 </div>
                 <div>
-                  <label htmlFor="class" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Class
+                  <label htmlFor="semester" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Semester
                   </label>
                   <input
-                    id="class"
-                    name="class"
+                    id="semester"
+                    name="semester"
                     type="text"
                     required
-                    value={formData.class}
+                    value={formData.semester}
                     onChange={handleChange}
-                    className={`mt-1 input-field ${errors.class ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    placeholder="e.g., CSE-A"
+                    className={`mt-1 input-field ${errors.semester ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    placeholder="e.g., 1, 2, 3, etc."
                   />
-                  {errors.class && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.class}</p>
+                  {errors.semester && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.semester}</p>
                   )}
                 </div>
               </div>
