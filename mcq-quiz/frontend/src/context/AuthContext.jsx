@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   // Set up axios defaults
-  axios.defaults.baseURL = 'http://localhost:5001/api';
+  axios.defaults.baseURL = API_BASE_URL;
   
   const fetchUser = async () => {
     try {

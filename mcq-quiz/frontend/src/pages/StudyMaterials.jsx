@@ -193,7 +193,7 @@ const StudyMaterials = () => {
   const getFileUrl = (fileUrl) => {
     // If it's an uploaded file (starts with /uploads/), prepend backend URL
     if (fileUrl && fileUrl.startsWith('/uploads/')) {
-      return `http://localhost:5001${fileUrl}`;
+      return `https://onlinesubjectquiz.onrender.com${fileUrl}`;
     }
     // Otherwise, it's an external URL, return as is
     return fileUrl;
@@ -383,7 +383,7 @@ const StudyMaterials = () => {
                       </svg>
                       <span>File uploaded successfully!</span>
                       <a 
-                        href={`http://localhost:5001${formData.fileUrl}`}
+                        href={`https://onlinesubjectquiz.onrender.com${formData.fileUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary-600 hover:underline"

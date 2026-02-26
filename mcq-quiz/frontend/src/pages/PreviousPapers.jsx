@@ -194,7 +194,7 @@ const PreviousPapers = () => {
       await api.put(`/previous-papers/${paper._id}/download`);
       
       // Open PDF in new tab
-      const fileUrl = `http://localhost:5001${paper.fileUrl}`;
+      const fileUrl = `https://onlinesubjectquiz.onrender.com${paper.fileUrl}`;
       window.open(fileUrl, '_blank');
       
       toast.success('Opening PDF...');
