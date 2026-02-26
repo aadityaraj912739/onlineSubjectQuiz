@@ -190,16 +190,50 @@ const PreviousPapers = () => {
 
   const handleDownload = async (paper) => {
     try {
-      // Increment download count
-      await api.put(`/previous-papers/${paper._id}/download`);
+      // Use the API download endpoint with proper authentication
+      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
       
-      // Open PDF in new tab
-      const fileUrl = `https://onlinesubjectquiz.onrender.com${paper.fileUrl}`;
-      window.open(fileUrl, '_blank');
+      // Get the auth token
+      const token = localStorage.getItem('token');
       
-      toast.success('Opening PDF...');
+      // Create a temporary link to trigger download with authentication
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', paper.fileName || 'paper.pdf');
+      link.style.display = 'none';
+      
+      // Add token to request by opening in new window with auth header
+      // For authenticated file download, we need to fetch and create blob
+      const response = await fetch(downloadUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Download failed');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast.success('Download started!');
     } catch (error) {
-      toast.error('Download failed');
+      const errorMessage = error.message || 'Download failed';
+      if (errorMessage.includes('not found on server')) {
+        toast.error('File no longer available. Please contact the teacher to re-upload.', {
+          duration: 5000
+        });
+      } else {
+        toast.error(errorMessage);
+      }
       console.error('Download error:', error);
     }
   };
