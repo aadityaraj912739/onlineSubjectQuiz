@@ -226,15 +226,26 @@ const PreviousPapers = () => {
       
       toast.success('Download started!');
     } catch (error) {
-      const errorMessage = error.message || 'Download failed';
-      if (errorMessage.includes('not found on server')) {
-        toast.error('File no longer available. Please contact the teacher to re-upload.', {
-          duration: 5000
-        });
-      } else {
-        toast.error(errorMessage);
-      }
       console.error('Download error:', error);
+      const errorMessage = error.message || 'Download failed';
+      
+      // Check for file not available errors
+      if (errorMessage.includes('not found on server') || 
+          errorMessage.includes('File not found') ||
+          errorMessage.includes('fileNotAvailable')) {
+        toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
+          duration: 6000,
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontWeight: '500'
+          }
+        });
+      } else if (error.message.includes('Previous paper not found')) {
+        toast.error('This paper has been deleted or is no longer available.');
+      } else {
+        toast.error(errorMessage || 'Failed to download file. Please try again.');
+      }
     }
   };
 

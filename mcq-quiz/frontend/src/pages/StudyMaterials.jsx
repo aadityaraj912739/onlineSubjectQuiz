@@ -207,6 +207,14 @@ const StudyMaterials = () => {
       if (material.fileUrl && material.fileUrl.startsWith('/uploads/')) {
         // Use fetch to download the file
         const response = await fetch(fileUrl);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('File not found on server. Please contact the teacher to re-upload.');
+          }
+          throw new Error(`Download failed with status: ${response.status}`);
+        }
+        
         const blob = await response.blob();
         
         // Create a download link
@@ -226,8 +234,20 @@ const StudyMaterials = () => {
         toast.success('Opening file in new tab!');
       }
     } catch (error) {
-      toast.error('Failed to download file');
       console.error('Download error:', error);
+      
+      if (error.message.includes('not found on server') || error.message.includes('File not found')) {
+        toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
+          duration: 6000,
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontWeight: '500'
+          }
+        });
+      } else {
+        toast.error(error.message || 'Failed to download file');
+      }
     }
   };
 

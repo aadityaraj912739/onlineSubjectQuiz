@@ -315,14 +315,25 @@ router.get('/download/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Previous paper not found in database' });
         }
 
+        if (!paper.fileUrl) {
+            return res.status(404).json({ 
+                message: 'File URL not found for this paper',
+                fileNotAvailable: true
+            });
+        }
+
         const filePath = path.join(__dirname, '..', paper.fileUrl);
+        console.log('Attempting to download file from:', filePath);
 
         // Check if file exists
         if (!fs.existsSync(filePath)) {
-            console.error(`File not found: ${filePath}`);
+            console.error(`File not found at path: ${filePath}`);
+            console.error(`Paper details - ID: ${paper._id}, Title: ${paper.title}`);
             return res.status(404).json({ 
-                message: 'File not found on server. This may occur after server restarts on cloud platforms.',
-                suggestion: 'Please contact the teacher to re-upload the file.'
+                message: 'File not found on server',
+                details: 'The file may have been deleted after a server restart. This is common on cloud hosting platforms.',
+                fileNotAvailable: true,
+                action: 'Please contact the teacher to re-upload the file.'
             });
         }
 
@@ -338,7 +349,10 @@ router.get('/download/:id', auth, async (req, res) => {
         res.sendFile(filePath);
     } catch (error) {
         console.error('Error downloading file:', error);
-        res.status(500).json({ message: 'Server error while downloading file' });
+        res.status(500).json({ 
+            message: 'Server error while downloading file',
+            error: error.message 
+        });
     }
 });
 
