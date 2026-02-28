@@ -1,53 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const PreviousPaper = require('../models/PreviousPaper');
-
-// Configure multer for file upload
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'uploads/previous-papers';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'paper-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /pdf/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Only PDF files are allowed!'));
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-    fileFilter: fileFilter
-});
+const { uploadPreviousPaper, deleteFromCloudinary, extractPublicId } = require('../config/cloudinary');
 
 // @route   POST /api/previous-papers/upload
 // @desc    Upload a previous year paper (Teacher only)
 // @access  Private (Teacher)
-router.post('/upload', auth, upload.single('file'), async (req, res) => {
+router.post('/upload', auth, uploadPreviousPaper.single('file'), async (req, res) => {
     try {
         if (req.user.role !== 'teacher') {
-            // Delete uploaded file if user is not a teacher
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
+            // Delete uploaded file from Cloudinary if user is not a teacher
+            if (req.file && req.file.public_id) {
+                await deleteFromCloudinary(req.file.public_id, 'raw');
             }
             return res.status(403).json({ message: 'Only teachers can upload previous papers' });
         }
@@ -59,8 +24,10 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
         const { title, subject, year, country, state, college, branch, semester } = req.body;
 
         if (!title || !subject || !year || !country || !state || !college || !branch || !semester) {
-            // Delete uploaded file if validation fails
-            fs.unlinkSync(req.file.path);
+            // Delete uploaded file from Cloudinary if validation fails
+            if (req.file.public_id) {
+                await deleteFromCloudinary(req.file.public_id, 'raw');
+            }
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -74,9 +41,10 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
             branch,
             semester,
             teacher: req.user.id,
-            fileUrl: `/uploads/previous-papers/${req.file.filename}`,
+            fileUrl: req.file.path, // Cloudinary URL
             fileName: req.file.originalname,
-            fileSize: req.file.size
+            fileSize: req.file.size,
+            cloudinaryPublicId: req.file.public_id // Store for later deletion
         });
 
         await previousPaper.save();
@@ -90,9 +58,13 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
         });
     } catch (error) {
         console.error('Error uploading previous paper:', error);
-        // Delete uploaded file if error occurs
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
+        // Delete uploaded file from Cloudinary if error occurs
+        if (req.file && req.file.public_id) {
+            try {
+                await deleteFromCloudinary(req.file.public_id, 'raw');
+            } catch (deleteError) {
+                console.error('Error deleting file from Cloudinary:', deleteError);
+            }
         }
         res.status(500).json({ message: 'Server error while uploading previous paper' });
     }
@@ -267,10 +239,24 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(403).json({ message: 'You can only delete your own papers' });
         }
 
-        // Delete the file from filesystem
-        const filePath = path.join(__dirname, '..', paper.fileUrl);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+        // Delete the file from Cloudinary
+        if (paper.cloudinaryPublicId) {
+            try {
+                await deleteFromCloudinary(paper.cloudinaryPublicId, 'raw');
+            } catch (deleteError) {
+                console.error('Error deleting from Cloudinary:', deleteError);
+                // Continue with database deletion even if Cloudinary deletion fails
+            }
+        } else if (paper.fileUrl) {
+            // Try to extract public_id from URL if not stored
+            const publicId = extractPublicId(paper.fileUrl);
+            if (publicId) {
+                try {
+                    await deleteFromCloudinary(publicId, 'raw');
+                } catch (deleteError) {
+                    console.error('Error deleting from Cloudinary using extracted ID:', deleteError);
+                }
+            }
         }
 
         await PreviousPaper.findByIdAndDelete(req.params.id);
@@ -322,31 +308,13 @@ router.get('/download/:id', auth, async (req, res) => {
             });
         }
 
-        const filePath = path.join(__dirname, '..', paper.fileUrl);
-        console.log('Attempting to download file from:', filePath);
-
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            console.error(`File not found at path: ${filePath}`);
-            console.error(`Paper details - ID: ${paper._id}, Title: ${paper.title}`);
-            return res.status(404).json({ 
-                message: 'File not found on server',
-                details: 'The file may have been deleted after a server restart. This is common on cloud hosting platforms.',
-                fileNotAvailable: true,
-                action: 'Please contact the teacher to re-upload the file.'
-            });
-        }
-
         // Increment download count
         paper.downloadCount += 1;
         await paper.save();
 
-        // Set headers for file download
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${paper.fileName}"`);
-
-        // Send file
-        res.sendFile(filePath);
+        // Redirect to Cloudinary URL for direct download
+        // Cloudinary URLs are permanent and always accessible
+        res.redirect(paper.fileUrl);
     } catch (error) {
         console.error('Error downloading file:', error);
         res.status(500).json({ 

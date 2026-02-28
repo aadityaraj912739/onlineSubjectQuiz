@@ -1,62 +1,25 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const StudyMaterial = require('../models/StudyMaterial');
 const { auth, isTeacher, isStudent } = require('../middleware/auth');
+const { uploadStudyMaterial, deleteFromCloudinary, extractPublicId } = require('../config/cloudinary');
 
 const router = express.Router();
-
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '..', 'uploads');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    // Allow pdf, doc, docx, ppt, pptx, txt, jpg, png, xlsx, xls
-    const allowedTypes = /pdf|doc|docx|ppt|pptx|txt|jpg|jpeg|png|xlsx|xls/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (extname && mimetype) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Only PDF, DOC, DOCX, PPT, PPTX, TXT, Excel (XLS, XLSX) and image files are allowed!'));
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-    fileFilter: fileFilter
-});
 
 // @route   POST /api/study-materials/upload
 // @desc    Upload a file
 // @access  Private (Teacher only)
-router.post('/upload', auth, isTeacher, upload.single('file'), async (req, res) => {
+router.post('/upload', auth, isTeacher, uploadStudyMaterial.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const fileUrl = `/uploads/${req.file.filename}`;
-        
         res.json({
             message: 'File uploaded successfully',
-            fileUrl: fileUrl,
+            fileUrl: req.file.path, // Cloudinary URL
             fileName: req.file.originalname,
-            fileSize: req.file.size
+            fileSize: req.file.size,
+            cloudinaryPublicId: req.file.public_id
         });
     } catch (error) {
         res.status(500).json({ message: error.message || 'Server error while uploading file' });
@@ -68,7 +31,7 @@ router.post('/upload', auth, isTeacher, upload.single('file'), async (req, res) 
 // @access  Private
 router.post('/', auth, isTeacher, async (req, res) => {
     try {
-        const { title, description, subject, type, fileUrl, content, tags } = req.body;
+        const { title, description, subject, type, fileUrl, content, tags, cloudinaryPublicId } = req.body;
 
         if (!title || !subject) {
             return res.status(400).json({ message: 'Title and subject are required' });
@@ -82,7 +45,8 @@ router.post('/', auth, isTeacher, async (req, res) => {
             teacher: req.user._id,
             fileUrl,
             content,
-            tags: tags || []
+            tags: tags || [],
+            cloudinaryPublicId
         });
 
         await studyMaterial.save();
@@ -211,6 +175,41 @@ router.delete('/:id', auth, isTeacher, async (req, res) => {
         // Check if this teacher owns the material
         if (material.teacher.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized to delete this material' });
+        }
+
+        // Delete file from Cloudinary if exists
+        if (material.cloudinaryPublicId) {
+            try {
+                // Determine resource type from public_id or fileUrl
+                let resourceType = 'raw';
+                if (material.fileUrl) {
+                    if (material.fileUrl.includes('/image/')) {
+                        resourceType = 'image';
+                    } else if (material.fileUrl.includes('/video/')) {
+                        resourceType = 'video';
+                    }
+                }
+                await deleteFromCloudinary(material.cloudinaryPublicId, resourceType);
+            } catch (deleteError) {
+                console.error('Error deleting from Cloudinary:', deleteError);
+                // Continue with database deletion even if Cloudinary deletion fails
+            }
+        } else if (material.fileUrl) {
+            // Try to extract public_id from URL if not stored
+            const publicId = extractPublicId(material.fileUrl);
+            if (publicId) {
+                try {
+                    let resourceType = 'raw';
+                    if (material.fileUrl.includes('/image/')) {
+                        resourceType = 'image';
+                    } else if (material.fileUrl.includes('/video/')) {
+                        resourceType = 'video';
+                    }
+                    await deleteFromCloudinary(publicId, resourceType);
+                } catch (deleteError) {
+                    console.error('Error deleting from Cloudinary using extracted ID:', deleteError);
+                }
+            }
         }
 
         await StudyMaterial.findByIdAndDelete(req.params.id);

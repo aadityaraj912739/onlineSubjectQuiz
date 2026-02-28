@@ -59,6 +59,10 @@ const previousPaperSchema = new mongoose.Schema({
     fileSize: {
         type: Number
     },
+    cloudinaryPublicId: {
+        type: String,
+        trim: true
+    },
     downloadCount: {
         type: Number,
         default: 0

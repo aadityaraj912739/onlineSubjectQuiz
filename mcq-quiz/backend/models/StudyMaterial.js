@@ -29,6 +29,10 @@ const studyMaterialSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    cloudinaryPublicId: {
+        type: String,
+        trim: true
+    },
     content: {
         type: String, // For text-based notes
         trim: true
