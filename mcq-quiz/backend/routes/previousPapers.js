@@ -312,9 +312,27 @@ router.get('/download/:id', auth, async (req, res) => {
         paper.downloadCount += 1;
         await paper.save();
 
-        // Redirect to Cloudinary URL for direct download
-        // Cloudinary URLs are permanent and always accessible
-        res.redirect(paper.fileUrl);
+        // Check if it's a Cloudinary URL (new files) or local URL (old files)
+        if (paper.fileUrl.includes('cloudinary.com')) {
+            // For Cloudinary files, return the URL in JSON format
+            // This avoids CORS issues with redirects
+            res.json({
+                success: true,
+                fileUrl: paper.fileUrl,
+                fileName: paper.fileName,
+                message: 'File available on cloud storage'
+            });
+        } else if (paper.fileUrl.startsWith('/uploads/')) {
+            // Old local files - return error as they no longer exist
+            return res.status(404).json({ 
+                message: 'File was uploaded before cloud storage migration and is no longer available. Please re-upload.',
+                fileNotAvailable: true,
+                requiresReupload: true
+            });
+        } else {
+            // Unknown URL format, try to redirect anyway
+            res.redirect(paper.fileUrl);
+        }
     } catch (error) {
         console.error('Error downloading file:', error);
         res.status(500).json({ 

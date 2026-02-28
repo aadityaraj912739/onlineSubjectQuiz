@@ -190,39 +190,74 @@ const PreviousPapers = () => {
 
   const handleDownload = async (paper) => {
     try {
-      // Use the API download endpoint with proper authentication
-      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
+      // Check if file is stored on Cloudinary (new files)
+      if (paper.fileUrl && paper.fileUrl.includes('cloudinary.com')) {
+        // For Cloudinary files, download directly from CDN
+        toast.success('Opening file...');
+        
+        // Increment download count via API
+        try {
+          await api.put(`/previous-papers/${paper._id}/download`);
+        } catch (err) {
+          console.error('Failed to update download count:', err);
+        }
+        
+        // Open Cloudinary URL directly in new tab for download
+        window.open(paper.fileUrl, '_blank');
+        return;
+      }
       
-      // Get the auth token
+      // For old local files (pre-Cloudinary), show error message
+      if (paper.fileUrl && paper.fileUrl.startsWith('/uploads/')) {
+        toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
+          duration: 7000,
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontWeight: '500'
+          }
+        });
+        return;
+      }
+      
+      // Fallback: Try to download via backend endpoint
+      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
       const token = localStorage.getItem('token');
       
-      // Create a temporary link to trigger download with authentication
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', paper.fileName || 'paper.pdf');
-      link.style.display = 'none';
-      
-      // Add token to request by opening in new window with auth header
-      // For authenticated file download, we need to fetch and create blob
       const response = await fetch(downloadUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
-        }
+        },
+        redirect: 'follow'
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
         throw new Error(errorData.message || 'Download failed');
       }
 
-      // Create blob and download
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      link.href = blobUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      // If response is JSON, it means there's an error or redirect URL
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data.fileUrl) {
+          window.open(data.fileUrl, '_blank');
+        } else {
+          throw new Error(data.message || 'Download failed');
+        }
+      } else {
+        // Create blob and download for non-JSON responses
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.setAttribute('download', paper.fileName || 'paper.pdf');
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }
       
       toast.success('Download started!');
     } catch (error) {

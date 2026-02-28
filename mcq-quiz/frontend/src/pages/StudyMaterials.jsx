@@ -203,35 +203,33 @@ const StudyMaterials = () => {
     try {
       const fileUrl = getFileUrl(material.fileUrl);
       
-      // For uploaded files on our server
+      // Check if file is stored on Cloudinary (new files)
+      if (material.fileUrl && material.fileUrl.includes('cloudinary.com')) {
+        // For Cloudinary files, open directly from CDN
+        window.open(material.fileUrl, '_blank');
+        toast.success('Opening file in new tab!');
+        return;
+      }
+      
+      // For old local files (pre-Cloudinary), show error message
       if (material.fileUrl && material.fileUrl.startsWith('/uploads/')) {
-        // Use fetch to download the file
-        const response = await fetch(fileUrl);
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('File not found on server. Please contact the teacher to re-upload.');
+        toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
+          duration: 7000,
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontWeight: '500'
           }
-          throw new Error(`Download failed with status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        
-        // Create a download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = material.fileUrl.split('/').pop() || `${material.title}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        toast.success('File downloaded successfully!');
-      } else {
-        // For external URLs, open in new tab
+        });
+        return;
+      }
+      
+      // For any external URLs, open in new tab
+      if (material.fileUrl) {
         window.open(fileUrl, '_blank');
         toast.success('Opening file in new tab!');
+      } else {
+        throw new Error('No file URL available');
       }
     } catch (error) {
       console.error('Download error:', error);
