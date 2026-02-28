@@ -129,11 +129,19 @@ const Navbar = () => {
                 aria-expanded={isProfileOpen}
                 aria-haspopup="true"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-semibold text-sm">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-lg object-cover shadow-md"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-white font-semibold text-sm">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <span className="text-gray-900 dark:text-white font-medium hidden lg:block">
                   {user?.name}
                 </span>
@@ -156,11 +164,28 @@ const Navbar = () => {
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-800 rounded-lg shadow-xl border border-gray-200 dark:border-dark-600 py-1 z-50 animate-fadeIn">
                   <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-600">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{user?.email}</p>
-                    <span className="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300">
-                      {user?.role === 'teacher' ? 'Teacher' : 'Student'}
-                    </span>
+                    <div className="flex items-center space-x-3 mb-2">
+                      {user?.profileImage ? (
+                        <img
+                          src={user.profileImage}
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-500"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-lg">
+                            {user?.name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user?.name}</p>
+                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300">
+                          {user?.role === 'teacher' ? 'Teacher' : 'Student'}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
                   </div>
                   
                   <Link

@@ -48,6 +48,21 @@ const studyMaterialsStorage = new CloudinaryStorage({
     }
 });
 
+// Storage configuration for Profile Pictures (Images only)
+const profilePictureStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'profile-pictures',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        resource_type: 'image',
+        transformation: [{ width: 500, height: 500, crop: 'fill', gravity: 'face' }],
+        public_id: (req, file) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            return `user-${req.user.id}-${uniqueSuffix}`;
+        }
+    }
+});
+
 // File filter for Previous Papers
 const previousPapersFileFilter = (req, file, cb) => {
     const allowedTypes = /pdf/;
@@ -73,6 +88,19 @@ const studyMaterialsFileFilter = (req, file, cb) => {
     }
 };
 
+// File filter for Profile Pictures
+const profilePictureFileFilter = (req, file, cb) => {
+    const allowedTypes = /jpg|jpeg|png|gif|webp/;
+    const extname = allowedTypes.test(file.originalname.split('.').pop().toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Only image files (JPG, JPEG, PNG, GIF, WEBP) are allowed!'));
+    }
+};
+
 // Multer upload configurations
 const uploadPreviousPaper = multer({
     storage: previousPapersStorage,
@@ -84,6 +112,12 @@ const uploadStudyMaterial = multer({
     storage: studyMaterialsStorage,
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for videos and larger files
     fileFilter: studyMaterialsFileFilter
+});
+
+const uploadProfilePicture = multer({
+    storage: profilePictureStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit for profile pictures
+    fileFilter: profilePictureFileFilter
 });
 
 // Helper function to delete a file from Cloudinary
@@ -121,6 +155,7 @@ module.exports = {
     cloudinary,
     uploadPreviousPaper,
     uploadStudyMaterial,
+    uploadProfilePicture,
     deleteFromCloudinary,
     extractPublicId
 };

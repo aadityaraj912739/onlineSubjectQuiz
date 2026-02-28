@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const { uploadProfilePicture, deleteFromCloudinary } = require('../config/cloudinary');
 
 const router = express.Router();
 
@@ -206,6 +207,94 @@ router.put('/profile', auth, async (req, res) => {
     } catch (error) {
 
         res.status(500).json({ message: 'Server error during profile update' });
+    }
+});
+
+// @route   POST /api/auth/upload-profile-picture
+// @desc    Upload or update profile picture
+// @access  Private
+router.post('/upload-profile-picture', auth, uploadProfilePicture.single('profilePicture'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload an image file' });
+        }
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Delete old profile picture from Cloudinary if exists
+        if (user.profileImagePublicId) {
+            try {
+                await deleteFromCloudinary(user.profileImagePublicId, 'image');
+            } catch (deleteError) {
+                console.error('Error deleting old profile picture:', deleteError);
+                // Continue even if deletion fails
+            }
+        }
+
+        // Update user with new profile picture
+        user.profileImage = req.file.path; // Cloudinary URL
+        user.profileImagePublicId = req.file.public_id;
+
+        await user.save();
+
+        res.json({
+            message: 'Profile picture uploaded successfully',
+            profileImage: user.profileImage
+        });
+    } catch (error) {
+        console.error('Profile picture upload error:', error);
+        
+        // Delete uploaded file from Cloudinary if error occurs
+        if (req.file && req.file.public_id) {
+            try {
+                await deleteFromCloudinary(req.file.public_id, 'image');
+            } catch (deleteError) {
+                console.error('Error deleting file after error:', deleteError);
+            }
+        }
+        
+        res.status(500).json({ message: 'Server error while uploading profile picture' });
+    }
+});
+
+// @route   DELETE /api/auth/delete-profile-picture
+// @desc    Delete profile picture
+// @access  Private
+router.delete('/delete-profile-picture', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (!user.profileImage) {
+            return res.status(400).json({ message: 'No profile picture to delete' });
+        }
+
+        // Delete from Cloudinary
+        if (user.profileImagePublicId) {
+            try {
+                await deleteFromCloudinary(user.profileImagePublicId, 'image');
+            } catch (deleteError) {
+                console.error('Error deleting from Cloudinary:', deleteError);
+                // Continue with database update even if Cloudinary deletion fails
+            }
+        }
+
+        // Remove from database
+        user.profileImage = '';
+        user.profileImagePublicId = '';
+        await user.save();
+
+        res.json({ message: 'Profile picture deleted successfully' });
+    } catch (error) {
+        console.error('Profile picture deletion error:', error);
+        res.status(500).json({ message: 'Server error while deleting profile picture' });
     }
 });
 

@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { FaUser, FaEnvelope, FaBuilding, FaHashtag, FaChalkboardTeacher, FaCamera, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaBuilding, FaHashtag, FaChalkboardTeacher, FaCamera, FaLinkedin, FaGithub, FaTrash } from 'react-icons/fa';
 import { SiLeetcode } from 'react-icons/si';
 import Loading from '../components/Loading.jsx';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
-  const { user, updateProfile, loading } = useAuth();
+  const { user, updateProfile, loading, api } = useAuth();
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -69,6 +72,85 @@ const Profile = () => {
     await updateProfile(profileData);
   };
 
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+
+      const response = await api.post('/auth/upload-profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Update user context with new profile image
+      const updatedUser = { ...user, profileImage: response.data.profileImage };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      window.location.reload(); // Reload to update all components
+
+      toast.success('Profile picture updated successfully!');
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      toast.error(error.response?.data?.message || 'Failed to upload profile picture');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteProfilePicture = async () => {
+    if (!user.profileImage) {
+      toast.error('No profile picture to delete');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete your profile picture?')) {
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      await api.delete('/auth/delete-profile-picture');
+
+      // Update user context
+      const updatedUser = { ...user, profileImage: '' };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      window.location.reload(); // Reload to update all components
+
+      toast.success('Profile picture deleted successfully!');
+    } catch (error) {
+      console.error('Profile picture deletion error:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete profile picture');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -89,16 +171,47 @@ const Profile = () => {
             <div className="w-full md:w-1/3 bg-gray-50 dark:bg-dark-700 p-6 md:p-8 flex flex-col items-center justify-center">
               <div className="relative">
                 <img
-                  className="w-24 md:w-32 h-24 md:h-32 rounded-full object-cover shadow-md"
+                  className="w-24 md:w-32 h-24 md:h-32 rounded-full object-cover shadow-md ring-4 ring-white dark:ring-dark-600"
                   src={user.profileImage || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                   alt="Profile"
                 />
-                <button className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 text-white hover:bg-indigo-700 transition-colors">
-                  <FaCamera />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleProfilePictureChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={handleProfilePictureClick}
+                  disabled={uploading}
+                  className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 text-white hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
+                  title="Upload profile picture"
+                >
+                  {uploading ? (
+                    <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  ) : (
+                    <FaCamera />
+                  )}
                 </button>
+                {user.profileImage && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteProfilePicture}
+                    disabled={uploading}
+                    className="absolute top-0 right-0 bg-red-600 rounded-full p-2 text-white hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
+                    title="Delete profile picture"
+                  >
+                    <FaTrash className="text-xs" />
+                  </button>
+                )}
               </div>
               <h2 className="mt-4 text-lg md:text-xl font-semibold text-gray-800 dark:text-white">{user.name}</h2>
               <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400">{user.role}</span>
+              <p className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
+                Click camera icon to upload<br />JPG, PNG, GIF (max 5MB)
+              </p>
             </div>
             <div className="w-full md:w-2/3 p-6 md:p-8">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6">
