@@ -39,9 +39,9 @@ The application has been successfully integrated with Cloudinary for permanent c
 ### 4. **Environment Variables**
    - Created `.env.example` with Cloudinary credentials
    - Added three new environment variables:
-     - `CLOUDINARY_CLOUD_NAME=dqg3rns07`
-     - `CLOUDINARY_API_KEY=692181739345294`
-     - `CLOUDINARY_API_SECRET=jvRg2EZyhKU4wlOCQGq6RytCL6k`
+     - `CLOUDINARY_CLOUD_NAME=your_cloud_name`
+     - `CLOUDINARY_API_KEY=your_api_key`
+     - `CLOUDINARY_API_SECRET=your_api_secret`
 
 ## Benefits
 
@@ -73,9 +73,10 @@ The application has been successfully integrated with Cloudinary for permanent c
 If you don't have a `.env` file in `backend/` directory, create one and add:
 
 ```env
-CLOUDINARY_CLOUD_NAME=dqg3rns07
-CLOUDINARY_API_KEY=692181739345294
-CLOUDINARY_API_SECRET=jvRg2EZyhKU4wlOCQGq6RytCL6k
+# Get these credentials from your Cloudinary dashboard
+CLOUDINARY_CLOUD_NAME=your_cloud_name_here
+CLOUDINARY_API_KEY=your_api_key_here
+CLOUDINARY_API_SECRET=your_api_secret_here
 ```
 
 ### 2. Install Dependencies (Already Done)
