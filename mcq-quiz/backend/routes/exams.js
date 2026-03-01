@@ -441,7 +441,8 @@ router.get('/:id/questions', auth, isStudent, async (req, res) => {
                         text: item.option.text,
                         originalIndex: item.originalIndex // Send original index for answer validation
                     })),
-                    marks: q.marks
+                    marks: q.marks,
+                    timePerQuestion: q.timePerQuestion || 60
                 };
             })
         };
