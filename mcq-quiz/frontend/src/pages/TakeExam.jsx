@@ -175,6 +175,7 @@ const TakeExam = () => {
         timerIntervalRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exam, activeQuestionIndex, currentQuestion, skippedQuestions, handleSubmitExam]);
 
   // Handle question navigation - set timer when moving to a question
