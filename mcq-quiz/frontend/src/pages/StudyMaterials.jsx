@@ -190,15 +190,6 @@ const StudyMaterials = () => {
     }
   };
 
-  const getFileUrl = (fileUrl) => {
-    // If it's an uploaded file (starts with /uploads/), prepend backend URL
-    if (fileUrl && fileUrl.startsWith('/uploads/')) {
-      return `https://onlinesubjectquiz.onrender.com${fileUrl}`;
-    }
-    // Otherwise, it's an external URL, return as is
-    return fileUrl;
-  };
-
   const handleDownload = async (material) => {
     try {
       toast.loading('Preparing download...');

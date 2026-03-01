@@ -348,29 +348,33 @@ const CreateExam = () => {
                     <p className="text-sm text-red-600">{errors[`correct_${questionIndex}`]}</p>
                   )}
 
-                  <div className="flex items-center space-x-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Marks:
-                    </label>
-                    <input
-                      type="number"
-                      value={question.marks}
-                      onChange={(e) => handleQuestionChange(questionIndex, 'marks', parseInt(e.target.value) || 1)}
-                      min="1"
-                      max="10"
-                      className="input-field w-20"
-                    />
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-6">
-                      Time (seconds):
-                    </label>
-                    <input
-                      type="number"
-                      value={question.timePerQuestion}
-                      onChange={(e) => handleQuestionChange(questionIndex, 'timePerQuestion', parseInt(e.target.value) || 60)}
-                      min="10"
-                      max="600"
-                      className="input-field w-24"
-                    />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Marks:
+                      </label>
+                      <input
+                        type="number"
+                        value={question.marks}
+                        onChange={(e) => handleQuestionChange(questionIndex, 'marks', parseInt(e.target.value) || 1)}
+                        min="1"
+                        max="10"
+                        className="input-field w-20"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Time (seconds):
+                      </label>
+                      <input
+                        type="number"
+                        value={question.timePerQuestion}
+                        onChange={(e) => handleQuestionChange(questionIndex, 'timePerQuestion', parseInt(e.target.value) || 60)}
+                        min="10"
+                        max="600"
+                        className="input-field w-24"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -378,18 +382,18 @@ const CreateExam = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary"
+              className="btn-primary w-full sm:w-auto order-1 sm:order-2"
             >
               {loading ? 'Creating Exam...' : 'Create Exam'}
             </button>

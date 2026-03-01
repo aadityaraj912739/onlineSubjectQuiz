@@ -148,40 +148,40 @@ const TeacherDashboard = () => {
         </div>
 
         {/* Quick Access Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <button
             onClick={() => navigate('/create-exam')}
-            className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-105"
           >
-            <div className="flex items-center space-x-4">
-              <span className="text-4xl">➕</span>
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <span className="text-3xl md:text-4xl">➕</span>
               <div className="text-left">
-                <h3 className="text-xl font-bold">Create New Exam</h3>
-                <p className="text-primary-100 text-sm">Design and publish a new exam</p>
+                <h3 className="text-lg md:text-xl font-bold">Create New Exam</h3>
+                <p className="text-primary-100 text-xs md:text-sm">Design and publish a new exam</p>
               </div>
             </div>
           </button>
           <button
             onClick={() => navigate('/study-materials')}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-105"
           >
-            <div className="flex items-center space-x-4">
-              <span className="text-4xl">📚</span>
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <span className="text-3xl md:text-4xl">📚</span>
               <div className="text-left">
-                <h3 className="text-xl font-bold">Study Materials</h3>
-                <p className="text-blue-100 text-sm">Upload notes, PDFs & suggestions</p>
+                <h3 className="text-lg md:text-xl font-bold">Study Materials</h3>
+                <p className="text-blue-100 text-xs md:text-sm">Upload notes, PDFs & suggestions</p>
               </div>
             </div>
           </button>
           <button
             onClick={() => navigate('/previous-papers')}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-6 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-105"
           >
-            <div className="flex items-center space-x-4">
-              <span className="text-4xl">📄</span>
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <span className="text-3xl md:text-4xl">📄</span>
               <div className="text-left">
-                <h3 className="text-xl font-bold">Previous Papers</h3>
-                <p className="text-purple-100 text-sm">Upload question papers by location</p>
+                <h3 className="text-lg md:text-xl font-bold">Previous Papers</h3>
+                <p className="text-purple-100 text-xs md:text-sm">Upload question papers by location</p>
               </div>
             </div>
           </button>
@@ -189,9 +189,9 @@ const TeacherDashboard = () => {
 
         {/* Exams Table */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Exams</h2>
-            <Link to="/create-exam" className="btn-primary">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">Recent Exams</h2>
+            <Link to="/create-exam" className="btn-primary text-center">
               Create New Exam
             </Link>
           </div>
@@ -209,7 +209,8 @@ const TeacherDashboard = () => {
             </div>
           ) : (
             <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-700">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
                 <thead className="bg-gray-50 dark:bg-dark-800">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -293,6 +294,7 @@ const TeacherDashboard = () => {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

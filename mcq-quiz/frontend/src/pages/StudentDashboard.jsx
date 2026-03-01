@@ -264,10 +264,10 @@ const StudentDashboard = () => {
         </div>
 
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl w-full max-w-md">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Enter Exam Key</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 md:p-8 shadow-2xl w-full max-w-md">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-3 md:mb-4">Enter Exam Key</h2>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 md:mb-6">
                 To start the exam "{selectedExam?.title}", please enter the unique key provided by your teacher.
               </p>
               <input
@@ -275,18 +275,18 @@ const StudentDashboard = () => {
                 value={examKey}
                 onChange={(e) => setExamKey(e.target.value)}
                 placeholder="Unique Exam Key"
-                className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500"
+                className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-sm md:text-base"
               />
-              <div className="mt-8 flex justify-end space-x-4">
+              <div className="mt-6 md:mt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                 <button
                   onClick={closeModal}
-                  className="px-6 py-2 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="w-full sm:w-auto px-6 py-2 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleModalSubmit}
-                  className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors order-1 sm:order-2"
                 >
                   Start Exam
                 </button>
