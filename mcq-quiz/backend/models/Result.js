@@ -6,8 +6,8 @@ const answerSchema = new mongoose.Schema({
         required: true
     },
     selectedOption: {
-        type: Number, // index of selected option
-        required: true
+        type: Number, // index of selected option, null if not answered
+        default: null
     },
     isCorrect: {
         type: Boolean,

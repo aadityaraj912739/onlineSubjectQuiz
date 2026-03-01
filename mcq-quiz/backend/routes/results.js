@@ -50,6 +50,14 @@ router.post('/submit', auth, isStudent, async (req, res) => {
             const question = exam.questions.id(answer.questionId);
             
             if (!question) {
+                console.log(`Question not found for questionId: ${answer.questionId}`);
+                // Still add to processedAnswers with 0 marks
+                processedAnswers.push({
+                    questionId: answer.questionId,
+                    selectedOption: null,
+                    isCorrect: false,
+                    marks: 0
+                });
                 continue;
             }
 
@@ -57,15 +65,23 @@ router.post('/submit', auth, isStudent, async (req, res) => {
             // answer.originalOptionIndex is the original position in the exam
             const originalOptionIndex = answer.originalOptionIndex;
             
-            const isCorrect = (originalOptionIndex !== null && 
-                              originalOptionIndex !== undefined && 
-                              question.options[originalOptionIndex]?.isCorrect) || false;
+            // Check if answer was provided
+            let isCorrect = false;
+            if (originalOptionIndex !== null && originalOptionIndex !== undefined) {
+                const originalOption = question.options[originalOptionIndex];
+                if (originalOption) {
+                    isCorrect = originalOption.isCorrect || false;
+                } else {
+                    console.log(`Option not found at index ${originalOptionIndex} for question ${answer.questionId}`);
+                }
+            }
+            
             const marks = isCorrect ? question.marks : 0;
             obtainedMarks += marks;
 
             processedAnswers.push({
                 questionId: answer.questionId,
-                selectedOption: originalOptionIndex, // Store original index
+                selectedOption: originalOptionIndex, // Store original index (can be null)
                 isCorrect,
                 marks
             });
@@ -108,7 +124,16 @@ router.post('/submit', auth, isStudent, async (req, res) => {
         });
     } catch (error) {
         console.error('Error submitting exam:', error);
-        res.status(500).json({ message: 'Server error while submitting exam', error: error.message });
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            message: 'Server error while submitting exam', 
+            error: error.message,
+            details: error.name
+        });
     }
 });
 

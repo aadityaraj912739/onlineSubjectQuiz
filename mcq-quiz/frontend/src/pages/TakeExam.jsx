@@ -19,6 +19,9 @@ const TakeExam = () => {
   const [submitting, setSubmitting] = useState(false);
   const [examStartTime] = useState(new Date());
   const [setNumber, setSetNumber] = useState(1);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(null);
+  const timerIntervalRef = useRef(null);
+  const isProcessingTimeoutRef = useRef(false);
 
   const handleSubmitExam = useCallback(async () => {
     if (submitting) return;
@@ -31,9 +34,13 @@ const TakeExam = () => {
       const formattedAnswers = exam.questions.map((question, index) => {
         const selectedOptionIndex = answers[index];
         // Get the originalIndex from the selected option
-        const originalOptionIndex = selectedOptionIndex !== null && selectedOptionIndex !== undefined
-          ? question.options[selectedOptionIndex]?.originalIndex
-          : null;
+        let originalOptionIndex = null;
+        if (selectedOptionIndex !== null && selectedOptionIndex !== undefined) {
+          const selectedOption = question.options[selectedOptionIndex];
+          if (selectedOption && selectedOption.originalIndex !== undefined) {
+            originalOptionIndex = selectedOption.originalIndex;
+          }
+        }
         
         return {
           questionId: question._id,
@@ -85,6 +92,7 @@ const TakeExam = () => {
         const firstQuestionTime = response.data.questions[0].timePerQuestion || 60;
         setQuestionTimeLeft(firstQuestionTime);
         questionTimersRef.current = { 0: firstQuestionTime };
+        setActiveQuestionIndex(0); // Start timer for first question
       }
       
     } catch (error) {
@@ -108,32 +116,66 @@ const TakeExam = () => {
     }
   }, [timeLeft, exam, handleSubmitExam]);
 
-  // Per-question timer - only runs for current question
+  // Per-question timer - only runs for the ACTIVE question
   useEffect(() => {
-    if (questionTimeLeft > 0 && exam && !skippedQuestions.has(currentQuestion)) {
-      const timer = setTimeout(() => {
-        const newTime = questionTimeLeft - 1;
-        setQuestionTimeLeft(newTime);
-        // Update the stored timer ONLY for current question using ref
-        questionTimersRef.current[currentQuestion] = newTime;
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (questionTimeLeft === 0 && exam && !skippedQuestions.has(currentQuestion)) {
-      // Time ran out for this question
-      setSkippedQuestions(prev => new Set([...prev, currentQuestion]));
-      toast.error(`Time's up for question ${currentQuestion + 1}!`);
-      
-      // Move to next question if available
-      if (currentQuestion < exam.questions.length - 1) {
-        const nextQuestion = currentQuestion + 1;
-        setCurrentQuestion(nextQuestion);
-        // Don't set timer here, let the question change effect handle it
-      } else {
-        // Last question, submit exam
-        handleSubmitExam();
+    // Clear any existing timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+
+    // Only start timer if this question is the actively viewed one
+    if (exam && activeQuestionIndex === currentQuestion && !skippedQuestions.has(currentQuestion)) {
+      if (questionTimeLeft > 0) {
+        timerIntervalRef.current = setInterval(() => {
+          setQuestionTimeLeft(prevTime => {
+            const newTime = prevTime - 1;
+            // Update stored time ONLY for current active question
+            questionTimersRef.current[currentQuestion] = newTime;
+            
+            if (newTime <= 0) {
+              // Time ran out for this question
+              if (!isProcessingTimeoutRef.current) {
+                isProcessingTimeoutRef.current = true;
+                clearInterval(timerIntervalRef.current);
+                timerIntervalRef.current = null;
+                
+                // Use setTimeout to avoid setState during render
+                setTimeout(() => {
+                  setSkippedQuestions(prev => new Set([...prev, currentQuestion]));
+                  toast.error(`Time's up for question ${currentQuestion + 1}!`);
+                  
+                  // Move to next question if available
+                  if (currentQuestion < exam.questions.length - 1) {
+                    const nextQuestion = currentQuestion + 1;
+                    setCurrentQuestion(nextQuestion);
+                  } else {
+                    // Last question, submit exam
+                    handleSubmitExam();
+                  }
+                  isProcessingTimeoutRef.current = false;
+                }, 0);
+              }
+              return 0;
+            }
+            
+            return newTime;
+          });
+        }, 1000);
+      } else if (questionTimeLeft === 0) {
+        // Time already expired
+        setSkippedQuestions(prev => new Set([...prev, currentQuestion]));
       }
     }
-  }, [questionTimeLeft, exam, currentQuestion, skippedQuestions, handleSubmitExam]);
+
+    // Cleanup
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, [exam, activeQuestionIndex, currentQuestion, skippedQuestions, handleSubmitExam]);
 
   // Handle question navigation - set timer when moving to a question
   useEffect(() => {
@@ -141,14 +183,17 @@ const TakeExam = () => {
       if (skippedQuestions.has(currentQuestion)) {
         // Question time already expired
         setQuestionTimeLeft(0);
+        setActiveQuestionIndex(null); // Don't run timer for expired question
       } else if (questionTimersRef.current[currentQuestion] !== undefined) {
         // Question was visited before, use remaining time
         setQuestionTimeLeft(questionTimersRef.current[currentQuestion]);
+        setActiveQuestionIndex(currentQuestion); // Activate timer for this question
       } else {
         // First visit to this question, use full time
         const fullTime = exam.questions[currentQuestion].timePerQuestion || 60;
         setQuestionTimeLeft(fullTime);
         questionTimersRef.current[currentQuestion] = fullTime;
+        setActiveQuestionIndex(currentQuestion); // Activate timer for this question
       }
     }
   }, [currentQuestion, exam, skippedQuestions]);
