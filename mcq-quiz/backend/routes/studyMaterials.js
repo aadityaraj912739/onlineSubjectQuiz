@@ -246,12 +246,20 @@ function getCloudinaryDownloadUrl(cloudinaryUrl, fileName) {
             return cloudinaryUrl; // Return original if format is unexpected
         }
 
-        // Add fl_attachment flag and original filename
-        const safeFileName = encodeURIComponent(fileName.replace(/[^a-zA-Z0-9._-]/g, '_'));
-        const downloadTransform = `fl_attachment:${safeFileName}`;
+        // Get file extension from filename
+        const fileExt = fileName.split('.').pop().toLowerCase();
         
-        // Construct the download URL
-        const downloadUrl = `${parts[0]}/upload/${downloadTransform}/${parts[1]}`;
+        // Extract public_id path (everything after upload/)
+        let publicIdPath = parts[1];
+        
+        // Check if URL already has extension, if not add it
+        if (!publicIdPath.endsWith(`.${fileExt}`)) {
+            publicIdPath = `${publicIdPath}.${fileExt}`;
+        }
+        
+        // Add fl_attachment flag (without custom filename to avoid encoding issues)
+        // Cloudinary will use the original filename from the upload
+        const downloadUrl = `${parts[0]}/upload/fl_attachment/${publicIdPath}`;
         
         return downloadUrl;
     } catch (error) {
