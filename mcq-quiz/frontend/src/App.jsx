@@ -233,35 +233,70 @@ const AppContent = () => {
       {/* Toast notifications with improved styling */}
       <Toaster
         position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
         toastOptions={{
+          // Default options
+          className: '',
           duration: 4000,
           style: {
-            background: 'var(--toast-bg)',
-            color: 'var(--toast-color)',
-            border: '1px solid var(--toast-border)',
-            borderRadius: '0.5rem',
-            padding: '1rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#fff',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            fontSize: '15px',
+            fontWeight: '600',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(10px)',
+            maxWidth: '400px',
           },
+          // Success
           success: {
             duration: 3000,
+            style: {
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#fff',
+              border: '2px solid rgba(255, 255, 255, 0.4)',
+            },
             iconTheme: {
-              primary: '#10b981',
-              secondary: '#ffffff',
+              primary: '#ffffff',
+              secondary: '#10b981',
             },
           },
+          // Error
           error: {
             duration: 4000,
+            style: {
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: '#fff',
+              border: '2px solid rgba(255, 255, 255, 0.4)',
+            },
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#ffffff',
+              primary: '#ffffff',
+              secondary: '#ef4444',
             },
           },
+          // Loading
           loading: {
+            style: {
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: '#fff',
+              border: '2px solid rgba(255, 255, 255, 0.4)',
+            },
             iconTheme: {
-              primary: '#6366f1',
-              secondary: '#ffffff',
+              primary: '#ffffff',
+              secondary: '#3b82f6',
+            },
+          },
+          // Info (custom type)
+          blank: {
+            style: {
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              color: '#fff',
+              border: '2px solid rgba(255, 255, 255, 0.4)',
             },
           },
         }}
