@@ -12,6 +12,9 @@ const TakeExam = () => {
   const [answers, setAnswers] = useState({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [questionTimeLeft, setQuestionTimeLeft] = useState(60);
+  const [questionTimers, setQuestionTimers] = useState({});
+  const [skippedQuestions, setSkippedQuestions] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [examStartTime] = useState(new Date());
@@ -70,11 +73,20 @@ const TakeExam = () => {
       setSetNumber(response.data.setNumber || 1);
       setTimeLeft(response.data.duration * 60);
       
+      // Initialize question timers for all questions
+      const timers = {};
       const initialAnswers = {};
-      response.data.questions.forEach((_, index) => {
+      response.data.questions.forEach((question, index) => {
+        timers[index] = question.timePerQuestion || 60;
         initialAnswers[index] = null;
       });
+      setQuestionTimers(timers);
       setAnswers(initialAnswers);
+      
+      // Set initial question timer
+      if (response.data.questions.length > 0) {
+        setQuestionTimeLeft(timers[0]);
+      }
       
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load exam');
@@ -97,7 +109,56 @@ const TakeExam = () => {
     }
   }, [timeLeft, exam, handleSubmitExam]);
 
+  // Per-question timer
+  useEffect(() => {
+    if (questionTimeLeft > 0 && exam && !skippedQuestions.has(currentQuestion)) {
+      const timer = setTimeout(() => {
+        const newTime = questionTimeLeft - 1;
+        setQuestionTimeLeft(newTime);
+        // Update the stored timer for this question
+        setQuestionTimers(prev => ({
+          ...prev,
+          [currentQuestion]: newTime
+        }));
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (questionTimeLeft === 0 && exam && !skippedQuestions.has(currentQuestion)) {
+      // Time ran out for this question
+      setSkippedQuestions(prev => new Set([...prev, currentQuestion]));
+      toast.error(`Time's up for question ${currentQuestion + 1}!`);
+      
+      // Move to next question if available
+      if (currentQuestion < exam.questions.length - 1) {
+        const nextQuestion = currentQuestion + 1;
+        setCurrentQuestion(nextQuestion);
+        setQuestionTimeLeft(questionTimers[nextQuestion] || exam.questions[nextQuestion].timePerQuestion || 60);
+      } else {
+        // Last question, submit exam
+        handleSubmitExam();
+      }
+    }
+  }, [questionTimeLeft, exam, currentQuestion, skippedQuestions, questionTimers, handleSubmitExam]);
+
+  // Reset question timer when changing questions manually
+  useEffect(() => {
+    if (exam && exam.questions[currentQuestion]) {
+      // Use the stored time for this question
+      const storedTime = questionTimers[currentQuestion];
+      if (storedTime !== undefined && !skippedQuestions.has(currentQuestion)) {
+        setQuestionTimeLeft(storedTime);
+      } else if (skippedQuestions.has(currentQuestion)) {
+        setQuestionTimeLeft(0);
+      }
+    }
+  }, [currentQuestion, exam, questionTimers, skippedQuestions]);
+
   const handleAnswerSelect = (questionIndex, optionIndex) => {
+    // Don't allow selecting answer for skipped questions
+    if (skippedQuestions.has(questionIndex)) {
+      toast.error('Time ran out for this question');
+      return;
+    }
+    
     setAnswers(prev => ({
       ...prev,
       [questionIndex]: optionIndex
@@ -168,7 +229,13 @@ const TakeExam = () => {
                 <div className={`text-lg md:text-xl lg:text-2xl font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-leetcode-orange'}`}>
                   {formatTime(timeLeft)}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Time Left</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Total Time</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-lg md:text-xl lg:text-2xl font-bold ${questionTimeLeft <= 10 ? 'text-red-600 animate-pulse' : questionTimeLeft <= 30 ? 'text-orange-600' : 'text-green-600'}`}>
+                  {questionTimeLeft}s
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Question Time</div>
               </div>
               <div className="text-center">
                 <div className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
@@ -195,6 +262,15 @@ const TakeExam = () => {
                     {currentQ.marks} Mark{currentQ.marks !== 1 ? 's' : ''}
                   </span>
                 </div>
+                
+                {skippedQuestions.has(currentQuestion) && (
+                  <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+                    <p className="text-red-800 dark:text-red-300 text-sm font-medium">
+                      ⏰ Time expired for this question. You cannot answer it anymore.
+                    </p>
+                  </div>
+                )}
+                
                 <p className="text-gray-800 dark:text-gray-200 text-lg leading-relaxed">
                   {currentQ.question}
                 </p>
@@ -205,10 +281,12 @@ const TakeExam = () => {
                 {currentQ.options.map((option, index) => (
                   <label
                     key={index}
-                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      answers[currentQuestion] === index
-                        ? 'border-leetcode-orange bg-orange-50 dark:bg-orange-900/20'
-                        : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-dark-500'
+                    className={`block p-4 border-2 rounded-lg transition-all ${
+                      skippedQuestions.has(currentQuestion)
+                        ? 'border-gray-200 dark:border-dark-600 bg-gray-100 dark:bg-dark-700 cursor-not-allowed opacity-60'
+                        : answers[currentQuestion] === index
+                        ? 'border-leetcode-orange bg-orange-50 dark:bg-orange-900/20 cursor-pointer'
+                        : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-dark-500 cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center">
@@ -218,7 +296,8 @@ const TakeExam = () => {
                         value={index}
                         checked={answers[currentQuestion] === index}
                         onChange={() => handleAnswerSelect(currentQuestion, index)}
-                        className="h-4 w-4 text-leetcode-orange focus:ring-leetcode-orange border-gray-300"
+                        disabled={skippedQuestions.has(currentQuestion)}
+                        className="h-4 w-4 text-leetcode-orange focus:ring-leetcode-orange border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <span className="ml-3 text-gray-800 dark:text-gray-200">
                         {String.fromCharCode(65 + index)}. {option.text}
@@ -262,6 +341,8 @@ const TakeExam = () => {
                     className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
                       currentQuestion === index
                         ? 'bg-leetcode-orange text-white'
+                        : skippedQuestions.has(index)
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                         : answers[index] !== null
                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         : 'bg-gray-100 text-gray-700 dark:bg-dark-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
@@ -280,6 +361,10 @@ const TakeExam = () => {
                 <div className="flex items-center">
                   <div className="w-4 h-4 bg-gray-100 dark:bg-dark-700 rounded mr-2"></div>
                   <span className="text-gray-600 dark:text-gray-400">Not Answered</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-red-100 dark:bg-red-900 rounded mr-2"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Time Expired</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-4 h-4 bg-leetcode-orange rounded mr-2"></div>

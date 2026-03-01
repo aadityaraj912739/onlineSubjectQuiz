@@ -19,6 +19,10 @@ const questionSchema = new mongoose.Schema({
     marks: {
         type: Number,
         default: 1
+    },
+    timePerQuestion: {
+        type: Number, // in seconds
+        default: 60
     }
 });
 

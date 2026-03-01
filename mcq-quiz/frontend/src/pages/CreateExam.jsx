@@ -23,7 +23,8 @@ const CreateExam = () => {
         { text: '', isCorrect: false },
         { text: '', isCorrect: false }
       ],
-      marks: 1
+      marks: 1,
+      timePerQuestion: 60
     }
   ]);
   const [errors, setErrors] = useState({});
@@ -78,7 +79,8 @@ const CreateExam = () => {
           { text: '', isCorrect: false },
           { text: '', isCorrect: false }
         ],
-        marks: 1
+        marks: 1,
+        timePerQuestion: 60
       }
     ]);
   };
@@ -357,6 +359,17 @@ const CreateExam = () => {
                       min="1"
                       max="10"
                       className="input-field w-20"
+                    />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-6">
+                      Time (seconds):
+                    </label>
+                    <input
+                      type="number"
+                      value={question.timePerQuestion}
+                      onChange={(e) => handleQuestionChange(questionIndex, 'timePerQuestion', parseInt(e.target.value) || 60)}
+                      min="10"
+                      max="600"
+                      className="input-field w-24"
                     />
                   </div>
                 </div>
