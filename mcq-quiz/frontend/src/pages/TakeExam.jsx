@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
@@ -13,7 +13,7 @@ const TakeExam = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [questionTimeLeft, setQuestionTimeLeft] = useState(60);
-  const [questionTimers, setQuestionTimers] = useState({});
+  const questionTimersRef = useRef({});
   const [skippedQuestions, setSkippedQuestions] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -73,19 +73,18 @@ const TakeExam = () => {
       setSetNumber(response.data.setNumber || 1);
       setTimeLeft(response.data.duration * 60);
       
-      // Initialize question timers for all questions
-      const timers = {};
+      // Initialize answers
       const initialAnswers = {};
-      response.data.questions.forEach((question, index) => {
-        timers[index] = question.timePerQuestion || 60;
+      response.data.questions.forEach((_, index) => {
         initialAnswers[index] = null;
       });
-      setQuestionTimers(timers);
       setAnswers(initialAnswers);
       
-      // Set initial question timer
+      // Set timer for first question
       if (response.data.questions.length > 0) {
-        setQuestionTimeLeft(timers[0]);
+        const firstQuestionTime = response.data.questions[0].timePerQuestion || 60;
+        setQuestionTimeLeft(firstQuestionTime);
+        questionTimersRef.current = { 0: firstQuestionTime };
       }
       
     } catch (error) {
@@ -109,17 +108,14 @@ const TakeExam = () => {
     }
   }, [timeLeft, exam, handleSubmitExam]);
 
-  // Per-question timer
+  // Per-question timer - only runs for current question
   useEffect(() => {
     if (questionTimeLeft > 0 && exam && !skippedQuestions.has(currentQuestion)) {
       const timer = setTimeout(() => {
         const newTime = questionTimeLeft - 1;
         setQuestionTimeLeft(newTime);
-        // Update the stored timer for this question
-        setQuestionTimers(prev => ({
-          ...prev,
-          [currentQuestion]: newTime
-        }));
+        // Update the stored timer ONLY for current question using ref
+        questionTimersRef.current[currentQuestion] = newTime;
       }, 1000);
       return () => clearTimeout(timer);
     } else if (questionTimeLeft === 0 && exam && !skippedQuestions.has(currentQuestion)) {
@@ -131,26 +127,31 @@ const TakeExam = () => {
       if (currentQuestion < exam.questions.length - 1) {
         const nextQuestion = currentQuestion + 1;
         setCurrentQuestion(nextQuestion);
-        setQuestionTimeLeft(questionTimers[nextQuestion] || exam.questions[nextQuestion].timePerQuestion || 60);
+        // Don't set timer here, let the question change effect handle it
       } else {
         // Last question, submit exam
         handleSubmitExam();
       }
     }
-  }, [questionTimeLeft, exam, currentQuestion, skippedQuestions, questionTimers, handleSubmitExam]);
+  }, [questionTimeLeft, exam, currentQuestion, skippedQuestions, handleSubmitExam]);
 
-  // Reset question timer when changing questions manually
+  // Handle question navigation - set timer when moving to a question
   useEffect(() => {
     if (exam && exam.questions[currentQuestion]) {
-      // Use the stored time for this question
-      const storedTime = questionTimers[currentQuestion];
-      if (storedTime !== undefined && !skippedQuestions.has(currentQuestion)) {
-        setQuestionTimeLeft(storedTime);
-      } else if (skippedQuestions.has(currentQuestion)) {
+      if (skippedQuestions.has(currentQuestion)) {
+        // Question time already expired
         setQuestionTimeLeft(0);
+      } else if (questionTimersRef.current[currentQuestion] !== undefined) {
+        // Question was visited before, use remaining time
+        setQuestionTimeLeft(questionTimersRef.current[currentQuestion]);
+      } else {
+        // First visit to this question, use full time
+        const fullTime = exam.questions[currentQuestion].timePerQuestion || 60;
+        setQuestionTimeLeft(fullTime);
+        questionTimersRef.current[currentQuestion] = fullTime;
       }
     }
-  }, [currentQuestion, exam, questionTimers, skippedQuestions]);
+  }, [currentQuestion, exam, skippedQuestions]);
 
   const handleAnswerSelect = (questionIndex, optionIndex) => {
     // Don't allow selecting answer for skipped questions
