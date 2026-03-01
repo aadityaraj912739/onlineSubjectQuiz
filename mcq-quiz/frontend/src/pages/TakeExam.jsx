@@ -196,6 +196,7 @@ const TakeExam = () => {
         setActiveQuestionIndex(currentQuestion); // Activate timer for this question
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, exam, skippedQuestions]);
 
   const handleAnswerSelect = (questionIndex, optionIndex) => {
