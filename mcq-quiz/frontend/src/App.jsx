@@ -230,51 +230,51 @@ const AppContent = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* Toast notifications - Centered, Responsive & Highly Visible */}
+      {/* Toast notifications - Optimized & Responsive */}
       <Toaster
         position="top-center"
         reverseOrder={false}
-        gutter={12}
+        gutter={8}
         containerClassName=""
         containerStyle={{
-          top: '20px',
+          top: '16px',
           left: '50%',
           transform: 'translateX(-50%)',
         }}
         toastOptions={{
           // Default options
           className: '',
-          duration: 4000,
+          duration: 3500,
           style: {
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: '#ffffff',
             WebkitTextFillColor: '#ffffff',
-            border: '3px solid rgba(255, 255, 255, 0.5)',
-            borderRadius: '16px',
-            padding: '18px 24px',
-            fontSize: '16px',
-            fontWeight: '700',
-            letterSpacing: '0.3px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px)',
-            minWidth: '320px',
-            maxWidth: '90vw',
+            border: '2px solid rgba(255, 255, 255, 0.4)',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            letterSpacing: '0.2px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            minWidth: '280px',
+            maxWidth: '85vw',
             width: 'fit-content',
             textAlign: 'center',
-            lineHeight: '1.6',
+            lineHeight: '1.5',
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+            textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
           },
           // Success
           success: {
-            duration: 3000,
+            duration: 2500,
             style: {
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: '#ffffff',
               WebkitTextFillColor: '#ffffff',
-              border: '3px solid rgba(255, 255, 255, 0.6)',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.5)',
+              textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
             },
             iconTheme: {
               primary: '#ffffff',
@@ -283,7 +283,7 @@ const AppContent = () => {
           },
           // Error
           error: {
-            duration: 4500,
+            duration: 4000,
             style: {
               background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: '#ffffff',

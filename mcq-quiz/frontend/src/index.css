@@ -41,34 +41,40 @@
   }
 }
 
-/* Mobile-specific toast adjustments */
+/* Mobile-specific toast adjustments (Optimized) */
 @media (max-width: 640px) {
   [data-sonner-toaster] {
-    padding: 0 12px !important;
+    padding: 0 8px !important;
   }
   
   [data-sonner-toast] {
-    min-width: 280px !important;
-    max-width: calc(100vw - 24px) !important;
-    font-size: 15px !important;
-    padding: 16px 20px !important;
+    min-width: 260px !important;
+    max-width: calc(100vw - 16px) !important;
+    font-size: 13px !important;
+    padding: 10px 14px !important;
     margin: 0 auto !important;
+    border-radius: 10px !important;
+    line-height: 1.4 !important;
   }
 }
 
-/* Tablet adjustments */
+/* Tablet adjustments (Optimized) */
 @media (min-width: 641px) and (max-width: 1024px) {
   [data-sonner-toast] {
-    min-width: 340px !important;
-    max-width: calc(90vw - 40px) !important;
+    min-width: 300px !important;
+    max-width: 420px !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
   }
 }
 
-/* Desktop adjustments */
+/* Desktop adjustments (Optimized) */
 @media (min-width: 1025px) {
   [data-sonner-toast] {
-    min-width: 360px !important;
-    max-width: 500px !important;
+    min-width: 320px !important;
+    max-width: 450px !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
   }
 }
 
