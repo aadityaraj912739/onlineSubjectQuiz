@@ -239,17 +239,31 @@ const StudyMaterials = () => {
       toast.dismiss();
       
       if (data.success && data.downloadUrl) {
+        // Fetch the file as blob for reliable download
+        toast.loading('Downloading file...');
+        
+        const fileResponse = await fetch(data.downloadUrl);
+        if (!fileResponse.ok) {
+          throw new Error('Failed to fetch file from cloud storage');
+        }
+        
+        const blob = await fileResponse.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
         // Create a temporary anchor element to trigger download
         const link = document.createElement('a');
-        link.href = data.downloadUrl;
+        link.href = blobUrl;
         link.download = data.fileName || `${material.title}.pdf`;
-        link.target = '_blank';
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        toast.success('Download started! Check your downloads folder.');
+        // Clean up blob URL
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+        
+        toast.dismiss();
+        toast.success('Download completed! Check your downloads folder.');
         return;
       }
       
