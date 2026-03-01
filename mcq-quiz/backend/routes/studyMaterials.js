@@ -269,7 +269,7 @@ function getCloudinaryDownloadUrl(cloudinaryUrl, fileName) {
 }
 
 // @route   GET /api/study-materials/download/:id
-// @desc    Download a study material file
+// @desc    Proxy download for study material files
 // @access  Private
 router.get('/download/:id', auth, async (req, res) => {
     try {
@@ -288,18 +288,33 @@ router.get('/download/:id', auth, async (req, res) => {
 
         // Check if it's a Cloudinary URL
         if (material.fileUrl.includes('cloudinary.com')) {
-            // Extract original filename from title or use a default
-            const fileName = material.title ? `${material.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf` : 'study_material.pdf';
+            // For Cloudinary files, proxy the download through our server
+            const axios = require('axios');
             
-            // Transform Cloudinary URL to force download
-            const downloadUrl = getCloudinaryDownloadUrl(material.fileUrl, fileName);
-            
-            res.json({
-                success: true,
-                downloadUrl: downloadUrl,
-                fileName: fileName,
-                message: 'File ready for download'
-            });
+            try {
+                // Fetch file from Cloudinary
+                const response = await axios({
+                    method: 'get',
+                    url: material.fileUrl,
+                    responseType: 'stream'
+                });
+
+                // Extract filename from title or use default
+                const fileName = material.title ? `${material.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf` : 'study_material.pdf';
+
+                // Set headers to force download with filename
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+                res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+                
+                // Pipe the file stream to response
+                response.data.pipe(res);
+            } catch (cloudinaryError) {
+                console.error('Error fetching from Cloudinary:', cloudinaryError.message);
+                return res.status(404).json({ 
+                    message: 'File not found on cloud storage',
+                    fileNotAvailable: true
+                });
+            }
         } else if (material.fileUrl.startsWith('/uploads/')) {
             // Old local files - no longer available
             return res.status(404).json({ 
@@ -309,12 +324,24 @@ router.get('/download/:id', auth, async (req, res) => {
             });
         } else {
             // External URL or unknown format
-            res.json({
-                success: true,
-                downloadUrl: material.fileUrl,
-                fileName: material.title || 'study_material',
-                message: 'File ready for download'
-            });
+            const axios = require('axios');
+            try {
+                const response = await axios({
+                    method: 'get',
+                    url: material.fileUrl,
+                    responseType: 'stream'
+                });
+
+                const fileName = material.title || 'study_material';
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+                res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+                response.data.pipe(res);
+            } catch (error) {
+                return res.status(404).json({ 
+                    message: 'File not found',
+                    fileNotAvailable: true
+                });
+            }
         }
     } catch (error) {
         console.error('Error downloading study material:', error);

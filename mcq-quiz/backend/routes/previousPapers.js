@@ -330,7 +330,7 @@ function getCloudinaryDownloadUrl(cloudinaryUrl, fileName) {
 }
 
 // @route   GET /api/previous-papers/download/:id
-// @desc    Download a previous paper file with validation
+// @desc    Proxy download for previous paper files
 // @access  Private
 router.get('/download/:id', auth, async (req, res) => {
     try {
@@ -353,16 +353,30 @@ router.get('/download/:id', auth, async (req, res) => {
 
         // Check if it's a Cloudinary URL (new files) or local URL (old files)
         if (paper.fileUrl.includes('cloudinary.com')) {
-            // Transform Cloudinary URL to force download with original filename
-            const downloadUrl = getCloudinaryDownloadUrl(paper.fileUrl, paper.fileName);
+            // For Cloudinary files, proxy the download through our server
+            const axios = require('axios');
             
-            // Return the download URL
-            res.json({
-                success: true,
-                downloadUrl: downloadUrl,
-                fileName: paper.fileName,
-                message: 'File ready for download'
-            });
+            try {
+                // Fetch file from Cloudinary
+                const response = await axios({
+                    method: 'get',
+                    url: paper.fileUrl,
+                    responseType: 'stream'
+                });
+
+                // Set headers to force download with original filename
+                res.setHeader('Content-Disposition', `attachment; filename="${paper.fileName}"`);
+                res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+                
+                // Pipe the file stream to response
+                response.data.pipe(res);
+            } catch (cloudinaryError) {
+                console.error('Error fetching from Cloudinary:', cloudinaryError.message);
+                return res.status(404).json({ 
+                    message: 'File not found on cloud storage',
+                    fileNotAvailable: true
+                });
+            }
         } else if (paper.fileUrl.startsWith('/uploads/')) {
             // Old local files - return error as they no longer exist
             return res.status(404).json({ 
@@ -371,13 +385,24 @@ router.get('/download/:id', auth, async (req, res) => {
                 requiresReupload: true
             });
         } else {
-            // Unknown URL format, try to return it anyway
-            res.json({
-                success: true,
-                downloadUrl: paper.fileUrl,
-                fileName: paper.fileName,
-                message: 'File ready for download'
-            });
+            // Unknown URL format, try to proxy it anyway
+            const axios = require('axios');
+            try {
+                const response = await axios({
+                    method: 'get',
+                    url: paper.fileUrl,
+                    responseType: 'stream'
+                });
+
+                res.setHeader('Content-Disposition', `attachment; filename="${paper.fileName}"`);
+                res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+                response.data.pipe(res);
+            } catch (error) {
+                return res.status(404).json({ 
+                    message: 'File not found',
+                    fileNotAvailable: true
+                });
+            }
         }
     } catch (error) {
         console.error('Error downloading file:', error);

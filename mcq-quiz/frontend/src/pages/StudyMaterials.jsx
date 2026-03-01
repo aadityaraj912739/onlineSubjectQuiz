@@ -194,7 +194,7 @@ const StudyMaterials = () => {
     try {
       toast.loading('Preparing download...');
       
-      // Use backend download endpoint to get proper download URL
+      // Backend now proxies the file and streams it directly
       const token = localStorage.getItem('token');
       const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/study-materials/download/${material._id}`;
       
@@ -204,7 +204,10 @@ const StudyMaterials = () => {
         }
       });
 
-      if (!response.ok) {
+      // Check if response is JSON (error) or file stream (success)
+      const contentType = response.headers.get('content-type');
+      
+      if (!response.ok || contentType?.includes('application/json')) {
         const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
         toast.dismiss();
         
@@ -235,56 +238,39 @@ const StudyMaterials = () => {
         return;
       }
 
-      const data = await response.json();
       toast.dismiss();
+      toast.loading('Downloading file...');
       
-      if (data.success && data.downloadUrl) {
-        // Fetch the file as blob for reliable download
-        toast.loading('Downloading file...');
-        
-        const fileResponse = await fetch(data.downloadUrl);
-        if (!fileResponse.ok) {
-          throw new Error('Failed to fetch file from cloud storage');
-        }
-        
-        const blob = await fileResponse.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        // Create a temporary anchor element to trigger download
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = data.fileName || `${material.title}.pdf`;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up blob URL
-        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
-        
-        toast.dismiss();
-        toast.success('Download completed! Check your downloads folder.');
-        return;
+      // Get the file as blob
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Extract filename from Content-Disposition header or use default
+      const disposition = response.headers.get('Content-Disposition');
+      let fileName = `${material.title}.pdf`;
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match) fileName = match[1];
       }
       
-      // If we reach here, something went wrong
-      toast.error('Failed to download file. Please try again.');
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up blob URL
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+      
+      toast.dismiss();
+      toast.success('Download completed! Check your downloads folder.');
     } catch (error) {
       console.error('Download error:', error);
       toast.dismiss();
-      
-      if (error.message.includes('not found on server') || error.message.includes('File not found')) {
-        toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
-          duration: 6000,
-          style: {
-            background: '#FEF3C7',
-            color: '#92400E',
-            fontWeight: '500'
-          }
-        });
-      } else {
-        toast.error(error.message || 'Failed to download file');
-      }
+      toast.error(error.message || 'Failed to download file. Please try again.');
     }
   };
 
