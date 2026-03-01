@@ -190,76 +190,69 @@ const PreviousPapers = () => {
 
   const handleDownload = async (paper) => {
     try {
-      // Check if file is stored on Cloudinary (new files)
-      if (paper.fileUrl && paper.fileUrl.includes('cloudinary.com')) {
-        // For Cloudinary files, download directly from CDN
-        toast.success('Opening file...');
-        
-        // Increment download count via API
-        try {
-          await api.put(`/previous-papers/${paper._id}/download`);
-        } catch (err) {
-          console.error('Failed to update download count:', err);
-        }
-        
-        // Open Cloudinary URL directly in new tab for download
-        window.open(paper.fileUrl, '_blank');
-        return;
-      }
+      toast.loading('Preparing download...');
       
-      // For old local files (pre-Cloudinary), show error message
-      if (paper.fileUrl && paper.fileUrl.startsWith('/uploads/')) {
-        toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
-          duration: 7000,
-          style: {
-            background: '#FEF3C7',
-            color: '#92400E',
-            fontWeight: '500'
-          }
-        });
-        return;
-      }
-      
-      // Fallback: Try to download via backend endpoint
-      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
+      // Always use backend download endpoint to get proper download URL
       const token = localStorage.getItem('token');
+      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
       
       const response = await fetch(downloadUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
-        },
-        redirect: 'follow'
+        }
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
-        throw new Error(errorData.message || 'Download failed');
+        toast.dismiss();
+        
+        // Handle specific error cases
+        if (errorData.fileNotAvailable) {
+          if (errorData.requiresReupload) {
+            toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
+              duration: 7000,
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                fontWeight: '500'
+              }
+            });
+          } else {
+            toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
+              duration: 6000,
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                fontWeight: '500'
+              }
+            });
+          }
+        } else {
+          toast.error(errorData.message || 'Download failed');
+        }
+        return;
       }
 
-      // If response is JSON, it means there's an error or redirect URL
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        if (data.fileUrl) {
-          window.open(data.fileUrl, '_blank');
-        } else {
-          throw new Error(data.message || 'Download failed');
-        }
-      } else {
-        // Create blob and download for non-JSON responses
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
+      const data = await response.json();
+      toast.dismiss();
+      
+      if (data.success && data.downloadUrl) {
+        // Create a temporary anchor element to trigger download
         const link = document.createElement('a');
-        link.href = blobUrl;
-        link.setAttribute('download', paper.fileName || 'paper.pdf');
+        link.href = data.downloadUrl;
+        link.download = data.fileName || 'paper.pdf';
+        link.target = '_blank';
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
+        
+        toast.success('Download started! Check your downloads folder.');
+        return;
       }
       
-      toast.success('Download started!');
+      // If we reach here, something went wrong
+      toast.error('Failed to download file. Please try again.');
     } catch (error) {
       console.error('Download error:', error);
       const errorMessage = error.message || 'Download failed';

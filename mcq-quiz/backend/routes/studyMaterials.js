@@ -232,4 +232,89 @@ router.get('/subjects/list', auth, async (req, res) => {
     }
 });
 
+// Helper function to transform Cloudinary URL to force download
+function getCloudinaryDownloadUrl(cloudinaryUrl, fileName) {
+    try {
+        // Check if it's a Cloudinary URL
+        if (!cloudinaryUrl.includes('cloudinary.com')) {
+            return cloudinaryUrl;
+        }
+
+        // Split URL at /upload/
+        const parts = cloudinaryUrl.split('/upload/');
+        if (parts.length !== 2) {
+            return cloudinaryUrl; // Return original if format is unexpected
+        }
+
+        // Add fl_attachment flag and original filename
+        const safeFileName = encodeURIComponent(fileName.replace(/[^a-zA-Z0-9._-]/g, '_'));
+        const downloadTransform = `fl_attachment:${safeFileName}`;
+        
+        // Construct the download URL
+        const downloadUrl = `${parts[0]}/upload/${downloadTransform}/${parts[1]}`;
+        
+        return downloadUrl;
+    } catch (error) {
+        console.error('Error transforming Cloudinary URL:', error);
+        return cloudinaryUrl; // Return original on error
+    }
+}
+
+// @route   GET /api/study-materials/download/:id
+// @desc    Download a study material file
+// @access  Private
+router.get('/download/:id', auth, async (req, res) => {
+    try {
+        const material = await StudyMaterial.findById(req.params.id);
+
+        if (!material) {
+            return res.status(404).json({ message: 'Study material not found' });
+        }
+
+        if (!material.fileUrl) {
+            return res.status(404).json({ 
+                message: 'No file attached to this material',
+                fileNotAvailable: true
+            });
+        }
+
+        // Check if it's a Cloudinary URL
+        if (material.fileUrl.includes('cloudinary.com')) {
+            // Extract original filename from title or use a default
+            const fileName = material.title ? `${material.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf` : 'study_material.pdf';
+            
+            // Transform Cloudinary URL to force download
+            const downloadUrl = getCloudinaryDownloadUrl(material.fileUrl, fileName);
+            
+            res.json({
+                success: true,
+                downloadUrl: downloadUrl,
+                fileName: fileName,
+                message: 'File ready for download'
+            });
+        } else if (material.fileUrl.startsWith('/uploads/')) {
+            // Old local files - no longer available
+            return res.status(404).json({ 
+                message: 'File was uploaded before cloud storage migration and is no longer available.',
+                fileNotAvailable: true,
+                requiresReupload: true
+            });
+        } else {
+            // External URL or unknown format
+            res.json({
+                success: true,
+                downloadUrl: material.fileUrl,
+                fileName: material.title || 'study_material',
+                message: 'File ready for download'
+            });
+        }
+    } catch (error) {
+        console.error('Error downloading study material:', error);
+        res.status(500).json({ 
+            message: 'Server error while downloading file',
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;

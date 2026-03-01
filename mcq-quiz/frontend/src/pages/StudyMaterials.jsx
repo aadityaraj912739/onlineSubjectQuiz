@@ -201,38 +201,72 @@ const StudyMaterials = () => {
 
   const handleDownload = async (material) => {
     try {
-      const fileUrl = getFileUrl(material.fileUrl);
+      toast.loading('Preparing download...');
       
-      // Check if file is stored on Cloudinary (new files)
-      if (material.fileUrl && material.fileUrl.includes('cloudinary.com')) {
-        // For Cloudinary files, open directly from CDN
-        window.open(material.fileUrl, '_blank');
-        toast.success('Opening file in new tab!');
-        return;
-      }
+      // Use backend download endpoint to get proper download URL
+      const token = localStorage.getItem('token');
+      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/study-materials/download/${material._id}`;
       
-      // For old local files (pre-Cloudinary), show error message
-      if (material.fileUrl && material.fileUrl.startsWith('/uploads/')) {
-        toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
-          duration: 7000,
-          style: {
-            background: '#FEF3C7',
-            color: '#92400E',
-            fontWeight: '500'
+      const response = await fetch(downloadUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
+        toast.dismiss();
+        
+        // Handle specific error cases
+        if (errorData.fileNotAvailable) {
+          if (errorData.requiresReupload) {
+            toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
+              duration: 7000,
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                fontWeight: '500'
+              }
+            });
+          } else {
+            toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
+              duration: 6000,
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                fontWeight: '500'
+              }
+            });
           }
-        });
+        } else {
+          toast.error(errorData.message || 'Download failed');
+        }
+        return;
+      }
+
+      const data = await response.json();
+      toast.dismiss();
+      
+      if (data.success && data.downloadUrl) {
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = data.downloadUrl;
+        link.download = data.fileName || `${material.title}.pdf`;
+        link.target = '_blank';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success('Download started! Check your downloads folder.');
         return;
       }
       
-      // For any external URLs, open in new tab
-      if (material.fileUrl) {
-        window.open(fileUrl, '_blank');
-        toast.success('Opening file in new tab!');
-      } else {
-        throw new Error('No file URL available');
-      }
+      // If we reach here, something went wrong
+      toast.error('Failed to download file. Please try again.');
     } catch (error) {
       console.error('Download error:', error);
+      toast.dismiss();
       
       if (error.message.includes('not found on server') || error.message.includes('File not found')) {
         toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {

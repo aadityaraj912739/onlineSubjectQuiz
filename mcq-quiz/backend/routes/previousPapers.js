@@ -290,6 +290,38 @@ router.put('/:id/download', auth, async (req, res) => {
     }
 });
 
+// Helper function to transform Cloudinary URL to force download
+function getCloudinaryDownloadUrl(cloudinaryUrl, fileName) {
+    try {
+        // Check if it's a Cloudinary URL
+        if (!cloudinaryUrl.includes('cloudinary.com')) {
+            return cloudinaryUrl;
+        }
+
+        // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{transformations}/{public_id}.{format}
+        // We need to add fl_attachment flag to force download
+        
+        // Split URL at /upload/
+        const parts = cloudinaryUrl.split('/upload/');
+        if (parts.length !== 2) {
+            return cloudinaryUrl; // Return original if format is unexpected
+        }
+
+        // Add fl_attachment flag and original filename
+        // fl_attachment:{filename} will set the download filename
+        const safeFileName = encodeURIComponent(fileName.replace(/[^a-zA-Z0-9._-]/g, '_'));
+        const downloadTransform = `fl_attachment:${safeFileName}`;
+        
+        // Construct the download URL
+        const downloadUrl = `${parts[0]}/upload/${downloadTransform}/${parts[1]}`;
+        
+        return downloadUrl;
+    } catch (error) {
+        console.error('Error transforming Cloudinary URL:', error);
+        return cloudinaryUrl; // Return original on error
+    }
+}
+
 // @route   GET /api/previous-papers/download/:id
 // @desc    Download a previous paper file with validation
 // @access  Private
@@ -314,13 +346,15 @@ router.get('/download/:id', auth, async (req, res) => {
 
         // Check if it's a Cloudinary URL (new files) or local URL (old files)
         if (paper.fileUrl.includes('cloudinary.com')) {
-            // For Cloudinary files, return the URL in JSON format
-            // This avoids CORS issues with redirects
+            // Transform Cloudinary URL to force download with original filename
+            const downloadUrl = getCloudinaryDownloadUrl(paper.fileUrl, paper.fileName);
+            
+            // Return the download URL
             res.json({
                 success: true,
-                fileUrl: paper.fileUrl,
+                downloadUrl: downloadUrl,
                 fileName: paper.fileName,
-                message: 'File available on cloud storage'
+                message: 'File ready for download'
             });
         } else if (paper.fileUrl.startsWith('/uploads/')) {
             // Old local files - return error as they no longer exist
@@ -330,8 +364,13 @@ router.get('/download/:id', auth, async (req, res) => {
                 requiresReupload: true
             });
         } else {
-            // Unknown URL format, try to redirect anyway
-            res.redirect(paper.fileUrl);
+            // Unknown URL format, try to return it anyway
+            res.json({
+                success: true,
+                downloadUrl: paper.fileUrl,
+                fileName: paper.fileName,
+                message: 'File ready for download'
+            });
         }
     } catch (error) {
         console.error('Error downloading file:', error);
