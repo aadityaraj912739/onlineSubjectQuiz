@@ -78,13 +78,11 @@ const TakeExam = () => {
     hasSubmittedRef.current = true;
     setSubmitting(true);
     
-    // Get the latest answers - use ref for auto-submit to avoid stale state
-    let currentAnswers = answers;
+    // ALWAYS use ref to get latest answers (not state) to avoid stale closure issues
+    const currentAnswers = answersRef.current;
     
     if (autoSubmit) {
       toast.error(`Exam auto-submitted: ${reason}`);
-      // Use ref answers which are always up-to-date
-      currentAnswers = answersRef.current;
       console.log('🚨 AUTO-SUBMIT TRIGGERED');
       console.log('📝 currentAnswers from ref:', currentAnswers);
       console.log('📊 Number of answered questions:', Object.keys(currentAnswers).filter(k => currentAnswers[k] !== null).length);
@@ -144,7 +142,7 @@ const TakeExam = () => {
       setSubmitting(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate]);
+  }, [submitting, examStartTime, exam, api, setNumber, navigate]);
 
   const fetchExamQuestions = useCallback(async () => {
     try {
