@@ -32,6 +32,7 @@ const TakeExam = () => {
   const wasInFullscreenRef = useRef(false); // Track if user was in fullscreen
   const hasLeftTabRef = useRef(false); // Track if user has left the tab
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
+  const answersRef = useRef({}); // Keep ref of latest answers for auto-submit
 
   // Auto-save answers to localStorage
   const saveAnswersToLocalStorage = useCallback((answersToSave) => {
@@ -77,17 +78,21 @@ const TakeExam = () => {
     hasSubmittedRef.current = true;
     setSubmitting(true);
     
+    // Get the latest answers - use ref for auto-submit to avoid stale state
+    let currentAnswers = answers;
+    
     if (autoSubmit) {
       toast.error(`Exam auto-submitted: ${reason}`);
-      // Save current answers before auto-submit
-      saveAnswersToLocalStorage(answers);
+      // Use ref answers which are always up-to-date
+      currentAnswers = answersRef.current;
+      console.log('Auto-submit using answers:', currentAnswers);
     }
     
     try {
       const timeTaken = Math.floor((new Date() - examStartTime) / 1000); // in seconds
       
       const formattedAnswers = exam.questions.map((question, index) => {
-        const selectedOptionIndex = answers[index];
+        const selectedOptionIndex = currentAnswers[index];
         // Get the originalIndex from the selected option
         let originalOptionIndex = null;
         if (selectedOptionIndex !== null && selectedOptionIndex !== undefined) {
@@ -103,6 +108,8 @@ const TakeExam = () => {
           originalOptionIndex: originalOptionIndex
         };
       });
+
+      console.log('Submitting formatted answers:', formattedAnswers.filter(a => a.selectedOption !== null && a.selectedOption !== undefined).length, 'answered questions');
 
       const questionOrder = exam.questions.map(q => q._id);
 
@@ -157,6 +164,7 @@ const TakeExam = () => {
       }
       
       setAnswers(initialAnswers);
+      answersRef.current = initialAnswers; // Initialize ref with same data
       
       // Set timer for first question
       if (response.data.questions.length > 0) {
@@ -183,8 +191,10 @@ const TakeExam = () => {
     if (!exam || !answers || submitting) return;
     
     const autoSaveInterval = setInterval(() => {
-      saveAnswersToLocalStorage(answers);
-      console.log('Answers auto-saved at', new Date().toLocaleTimeString());
+      // Use ref to get latest answers
+      saveAnswersToLocalStorage(answersRef.current);
+      const answeredCount = Object.keys(answersRef.current).filter(k => answersRef.current[k] !== null).length;
+      console.log('Answers auto-saved at', new Date().toLocaleTimeString(), '- Answered:', answeredCount);
     }, 30000); // Save every 30 seconds
     
     return () => clearInterval(autoSaveInterval);
@@ -241,8 +251,9 @@ const TakeExam = () => {
         // User left the tab - immediately save answers and count as violation
         if (!hasLeftTabRef.current) {
           hasLeftTabRef.current = true;
-          // Auto-save answers before warning
-          saveAnswersToLocalStorage(answers);
+          // Auto-save latest answers from ref before warning
+          saveAnswersToLocalStorage(answersRef.current);
+          console.log('Tab switched - saved answers:', Object.keys(answersRef.current).filter(k => answersRef.current[k] !== null).length, 'answers');
           handleViolation('Switched to another tab/window');
         }
       } else if (!document.hidden) {
@@ -493,7 +504,9 @@ const TakeExam = () => {
       [questionIndex]: optionIndex
     };
     
+    // Update both state and ref
     setAnswers(updatedAnswers);
+    answersRef.current = updatedAnswers; // Keep ref updated for auto-submit
     
     // Auto-save to localStorage
     saveAnswersToLocalStorage(updatedAnswers);
