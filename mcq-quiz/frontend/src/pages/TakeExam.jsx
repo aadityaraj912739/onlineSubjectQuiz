@@ -30,7 +30,6 @@ const TakeExam = () => {
   const [warningMessage, setWarningMessage] = useState('');
   const hasSubmittedRef = useRef(false);
   const wasInFullscreenRef = useRef(false); // Track if user was in fullscreen
-  const fullscreenCheckerRef = useRef(null);
   const hasLeftTabRef = useRef(false); // Track if user has left the tab
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
 
@@ -145,10 +144,6 @@ const TakeExam = () => {
       
       return () => {
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        const checker = fullscreenCheckerRef.current;
-        if (checker) {
-          clearInterval(checker);
-        }
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
