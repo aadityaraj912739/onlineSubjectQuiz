@@ -28,11 +28,9 @@ const TakeExam = () => {
   const warningCountRef = useRef(0); // Track actual count with ref to avoid stale closure
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
-  const [violations, setViolations] = useState([]);
   const hasSubmittedRef = useRef(false);
   const wasInFullscreenRef = useRef(false); // Track if user was in fullscreen
   const fullscreenCheckerRef = useRef(null);
-  const lastViolationTimeRef = useRef(0); // Track last violation time to prevent duplicates
   const hasLeftTabRef = useRef(false); // Track if user has left the tab
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
 
@@ -147,11 +145,13 @@ const TakeExam = () => {
       
       return () => {
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        if (fullscreenCheckerRef.current) {
-          clearInterval(fullscreenCheckerRef.current);
+        const checker = fullscreenCheckerRef.current;
+        if (checker) {
+          clearInterval(checker);
         }
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exam, loading, submitting]);
 
   // Function to enable fullscreen
@@ -192,6 +192,7 @@ const TakeExam = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exam, loading, submitting]);
 
   // Anti-Cheating: Disable copy-paste and keyboard shortcuts
@@ -251,6 +252,7 @@ const TakeExam = () => {
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('keydown', handleKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exam, loading]);
 
   // Anti-Cheating: Detect developer tools
@@ -273,6 +275,7 @@ const TakeExam = () => {
     const interval = setInterval(detectDevTools, 1000);
     
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exam, loading]);
 
   // Handle violation and warnings
@@ -286,9 +289,8 @@ const TakeExam = () => {
     
     // Update state for UI
     setWarningCount(newWarningCount);
-    setViolations(prev => [...prev, { message, timestamp }]);
     
-    console.log(`Violation detected: ${message}. Warning count: ${newWarningCount}/3`);
+    console.log(`[${timestamp}] Violation detected: ${message}. Warning count: ${newWarningCount}/3`);
     
     if (newWarningCount >= 3) {
       setWarningMessage(`Final Warning: ${message}. Exam will be auto-submitted now!`);
