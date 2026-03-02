@@ -135,7 +135,8 @@ const TakeExam = () => {
       toast.error(error.response?.data?.message || 'Failed to submit exam');
       setSubmitting(false);
     }
-  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate, saveAnswersToLocalStorage, clearAnswersFromLocalStorage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate]);
 
   const fetchExamQuestions = useCallback(async () => {
     try {
