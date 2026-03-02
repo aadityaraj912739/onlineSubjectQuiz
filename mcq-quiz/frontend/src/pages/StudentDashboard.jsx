@@ -193,61 +193,61 @@ const StudentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <header className="mb-6 md:mb-10">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white">
+      <div className="max-w-7xl mx-auto py-4 sm:py-6 md:py-8 px-3 sm:px-4 md:px-6 lg:px-8">
+        <header className="mb-4 sm:mb-6 md:mb-8 lg:mb-10">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white">
             Welcome, {user?.name}!
           </h1>
-          <p className="mt-2 text-sm md:text-base lg:text-lg text-gray-500 dark:text-gray-400">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-base text-gray-500 dark:text-gray-400">
             Your learning journey starts here.
           </p>
         </header>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-4 sm:mb-6 md:mb-8 lg:mb-10">
           <StatCard icon="📝" title="Exams Taken" value={summary.totalExamsTaken} color="blue" />
           <StatCard icon="📊" title="Average Score" value={`${summary.averageScore.toFixed(1)}%`} color="purple" />
           <StatCard icon="⏳" title="Active Exams" value={availableExams.filter(isExamActive).length} color="green" />
         </div>
 
         {/* Quick Access Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-4 sm:mb-6 md:mb-8 lg:mb-10">
           <button
             onClick={() => navigate('/study-materials')}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 transition-all transform hover:scale-105"
           >
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <span className="text-3xl md:text-4xl">📚</span>
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+              <span className="text-2xl sm:text-3xl md:text-4xl">📚</span>
               <div className="text-left">
-                <h3 className="text-base md:text-xl font-bold">Study Materials</h3>
-                <p className="text-blue-100 text-xs md:text-sm">Access notes, PDFs & suggestions</p>
+                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold">Study Materials</h3>
+                <p className="text-blue-100 text-[10px] sm:text-xs md:text-sm">Access notes, PDFs & suggestions</p>
               </div>
             </div>
           </button>
           <button
             onClick={() => navigate('/previous-papers')}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 transition-all transform hover:scale-105"
           >
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <span className="text-3xl md:text-4xl">📄</span>
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+              <span className="text-2xl sm:text-3xl md:text-4xl">📄</span>
               <div className="text-left">
-                <h3 className="text-base md:text-xl font-bold">Previous Papers</h3>
-                <p className="text-purple-100 text-xs md:text-sm">Practice with past exams</p>
+                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold">Previous Papers</h3>
+                <p className="text-purple-100 text-[10px] sm:text-xs md:text-sm">Practice with past exams</p>
               </div>
             </div>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-10">
-          <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-            <h3 className="text-base md:text-lg font-bold text-gray-800 dark:text-white mb-4">Join with Exam Key</h3>
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6 md:mb-8 lg:mb-10">
+          <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6">
+            <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-800 dark:text-white mb-3 sm:mb-4">Join with Exam Key</h3>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 md:space-x-4">
               <input
                 type="text"
                 value={examKey}
                 onChange={(e) => setExamKey(e.target.value)}
                 placeholder="Enter Exam Key"
-                className="flex-grow p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-sm md:text-base"
+                className="flex-grow p-2 sm:p-2.5 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm md:text-base"
               />
               <button
                 onClick={joinExamByKey}
@@ -307,13 +307,13 @@ const StatCard = ({ icon, title, value, color }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 flex items-center space-x-3 md:space-x-4 transform hover:scale-105 transition-transform duration-300">
-      <div className={`p-2 md:p-3 rounded-full ${colors[color]}`}>
-        <span className="text-xl md:text-2xl">{icon}</span>
+    <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 flex items-center space-x-2 sm:space-x-3 md:space-x-4 transform hover:scale-105 transition-transform duration-300">
+      <div className={`p-1.5 sm:p-2 md:p-3 rounded-full ${colors[color]} flex-shrink-0`}>
+        <span className="text-lg sm:text-xl md:text-2xl">{icon}</span>
       </div>
-      <div>
-        <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-        <p className="text-lg md:text-2xl font-bold text-gray-800 dark:text-white">{value}</p>
+      <div className="min-w-0">
+        <p className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{title}</p>
+        <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -321,25 +321,25 @@ const StatCard = ({ icon, title, value, color }) => {
 
 const ExamCard = ({ exam, onStart }) => (
   <div 
-    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col justify-between"
+    className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col justify-between"
     onClick={() => onStart(exam)}
   >
     <div>
-      <div className="flex justify-between items-start">
-        <h3 className="text-lg md:text-xl font-bold text-gray-800 dark:text-white pr-2">{exam.title}</h3>
-        <span className={`px-2 md:px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${isExamActive(exam) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+      <div className="flex justify-between items-start gap-2">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-800 dark:text-white pr-2 break-words">{exam.title}</h3>
+        <span className={`px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 ${isExamActive(exam) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
           {isExamActive(exam) ? 'Active' : 'Upcoming'}
         </span>
       </div>
-      <p className="text-xs md:text-sm font-medium text-indigo-500 dark:text-indigo-400 mt-1">{exam.subject}</p>
-      <p className="text-gray-600 dark:text-gray-400 mt-3 md:mt-4 text-xs md:text-sm">{exam.description}</p>
+      <p className="text-[10px] sm:text-xs md:text-sm font-medium text-indigo-500 dark:text-indigo-400 mt-1">{ exam.subject}</p>
+      <p className="text-gray-600 dark:text-gray-400 mt-2 sm:mt-3 md:mt-4 text-[10px] sm:text-xs md:text-sm break-words">{exam.description}</p>
     </div>
-    <div className="mt-4 md:mt-6 border-t border-gray-200 dark:border-gray-700 pt-3 md:pt-4">
-      <div className="flex justify-between text-xs md:text-sm text-gray-500 dark:text-gray-400">
+    <div className="mt-3 sm:mt-4 md:mt-5 lg:mt-6 border-t border-gray-200 dark:border-gray-700 pt-2 sm:pt-3 md:pt-4">
+      <div className="flex justify-between text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400 flex-wrap gap-2">
         <span>Duration: <strong>{exam.duration} mins</strong></span>
         <span>Marks: <strong>{exam.totalMarks}</strong></span>
       </div>
-      <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-2">
+      <div className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-2">
         Starts: <strong>{formatDate(exam.startTime)}</strong>
       </div>
     </div>
@@ -347,36 +347,36 @@ const ExamCard = ({ exam, onStart }) => (
 );
 
 const ResultItem = ({ result, navigate, onDownloadExcel, onDownloadPDF }) => (
-  <li className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-    <div className="flex items-center justify-between flex-wrap gap-3">
-      <div className="flex-1 min-w-[200px]">
-        <p className="font-semibold text-gray-800 dark:text-white">{result.exam.title}</p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+  <li className="p-3 sm:p-4 md:p-5 lg:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+    <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-3">
+      <div className="flex-1 min-w-[150px] sm:min-w-[200px]">
+        <p className="font-semibold text-sm sm:text-base text-gray-800 dark:text-white break-words">{result.exam.title}</p>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5">
           Score: {result.obtainedMarks}/{result.totalMarks} ({((result.obtainedMarks / result.totalMarks) * 100).toFixed(1)}%)
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <button 
           onClick={() => onDownloadExcel(result)}
-          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-md"
+          className="p-1.5 sm:p-2 bg-green-600 hover:bg-green-700 text-white rounded-md sm:rounded-lg transition-colors shadow-md"
           title="Download Excel"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </button>
         <button 
           onClick={() => onDownloadPDF(result)}
-          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-md"
+          className="p-1.5 sm:p-2 bg-red-600 hover:bg-red-700 text-white rounded-md sm:rounded-lg transition-colors shadow-md"
           title="Download PDF"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
         </button>
         <button 
           onClick={() => navigate(`/results/${result.exam._id}`)} 
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 whitespace-nowrap"
+          className="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 whitespace-nowrap px-1"
         >
           View Details &rarr;
         </button>

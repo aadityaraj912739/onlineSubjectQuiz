@@ -590,36 +590,37 @@ const TakeExam = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 select-none">
       {/* Fullscreen Prompt Modal */}
       {showFullscreenPrompt && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md">
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-10 max-w-lg mx-4 border-4 border-blue-500 dark:border-blue-400 animate-in zoom-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 max-w-lg w-full mx-4 border-2 sm:border-4 border-blue-500 dark:border-blue-400 animate-in zoom-in duration-300">
             <div className="text-center">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-6 animate-pulse">
-                <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-pulse">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                 🎯 Ready to Start Exam?
               </h2>
-              <p className="text-lg text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 leading-relaxed">
                 For a fair examination, this exam requires <span className="font-bold text-blue-600 dark:text-blue-400">fullscreen mode</span>. 
-                <br/>Click below to enable fullscreen and begin your exam.
+                <br className="hidden sm:block" />
+                <span className="sm:hidden"> </span>Click below to enable fullscreen and begin your exam.
               </p>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-xl p-4 mb-6">
-                <p className="text-sm text-yellow-900 dark:text-yellow-200 font-semibold">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <p className="text-xs sm:text-sm text-yellow-900 dark:text-yellow-200 font-semibold">
                   ⚠️ Important: Exiting fullscreen or switching tabs will result in warnings. 3 warnings = Auto-submit!
                 </p>
               </div>
               <button
                 onClick={enableFullscreen}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white text-xl rounded-xl hover:shadow-2xl transition-all duration-300 font-bold transform hover:scale-105 flex items-center justify-center gap-3"
+                className="w-full py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white text-base sm:text-lg md:text-xl rounded-lg sm:rounded-xl hover:shadow-2xl transition-all duration-300 font-bold transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
                 Start Exam in Fullscreen
               </button>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-4">
+              <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mt-3 sm:mt-4">
                 Press ESC anytime to exit fullscreen (but you'll get a warning!)
               </p>
             </div>
@@ -629,33 +630,33 @@ const TakeExam = () => {
 
       {/* Warning Modal */}
       {showWarningModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 border-4 border-red-500 dark:border-red-400 animate-in zoom-in duration-300">
-            <div className="flex items-start gap-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 max-w-md w-full mx-4 border-2 sm:border-4 border-red-500 dark:border-red-400 animate-in zoom-in duration-300">
+            <div className="flex items-start gap-3 sm:gap-4">
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center animate-pulse">
-                  <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center animate-pulse">
+                  <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-red-600 dark:text-red-400 mb-2">
                   {warningCount >= 3 ? '⚠️ EXAM AUTO-SUBMITTING' : '⚠️ VIOLATION DETECTED'}
                 </h3>
-                <p className="text-gray-900 dark:text-gray-100 font-semibold mb-4">
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100 font-semibold mb-3 sm:mb-4 break-words">
                   {warningMessage}
                 </p>
                 {warningCount < 3 && (
-                  <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg border-2 border-yellow-400 dark:border-yellow-600">
-                    <p className="text-sm text-yellow-900 dark:text-yellow-200 font-medium">
+                  <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2.5 sm:p-3 rounded-lg border-2 border-yellow-400 dark:border-yellow-600">
+                    <p className="text-xs sm:text-sm text-yellow-900 dark:text-yellow-200 font-medium">
                       🚨 {3 - warningCount} warning{3 - warningCount !== 1 ? 's' : ''} remaining before auto-submit!
                     </p>
                   </div>
                 )}
                 {warningCount >= 3 && (
-                  <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg border-2 border-red-400 dark:border-red-600">
-                    <p className="text-sm text-red-900 dark:text-red-200 font-medium">
+                  <div className="bg-red-100 dark:bg-red-900/30 p-2.5 sm:p-3 rounded-lg border-2 border-red-400 dark:border-red-600">
+                    <p className="text-xs sm:text-sm text-red-900 dark:text-red-200 font-medium">
                       ⛔ Maximum warnings exceeded. Your exam is being submitted automatically...
                     </p>
                   </div>
@@ -665,7 +666,7 @@ const TakeExam = () => {
             {warningCount < 3 && (
               <button
                 onClick={() => setShowWarningModal(false)}
-                className="mt-6 w-full py-3 bg-gradient-to-r from-red-600 to-pink-600 dark:from-red-500 dark:to-pink-500 text-white rounded-xl hover:shadow-lg transition-all duration-200 font-bold"
+                className="mt-5 sm:mt-6 w-full py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-pink-600 dark:from-red-500 dark:to-pink-500 text-white text-sm sm:text-base rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-bold"
               >
                 I Understand
               </button>
@@ -676,78 +677,78 @@ const TakeExam = () => {
 
       {/* Violations Indicator */}
       {warningCount > 0 && (
-        <div className="fixed top-20 right-4 z-50 bg-red-600 dark:bg-red-500 text-white px-4 py-2 rounded-xl shadow-2xl border-2 border-red-700 dark:border-red-400 animate-pulse">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <div className="fixed top-16 sm:top-20 right-2 sm:right-4 z-50 bg-red-600 dark:bg-red-500 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-2xl border border-red-700 sm:border-2 dark:border-red-400 animate-pulse">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
-            <span className="font-bold">Warnings: {warningCount}/3</span>
+            <span className="font-bold text-xs sm:text-sm">Warnings: {warningCount}/3</span>
           </div>
         </div>
       )}
       {/* Header with timer and exam info */}
-      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-lg border-b-2 border-blue-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
+      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-lg border-b border-blue-200 sm:border-b-2 dark:border-slate-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2.5 sm:py-3 md:py-4">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-2 sm:gap-3 md:gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   {exam.title}
                 </h1>
-                <span className="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white text-xs md:text-sm font-semibold rounded-full shadow-lg animate-pulse">
+                <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white text-[10px] sm:text-xs font-semibold rounded-full shadow-lg animate-pulse whitespace-nowrap">
                   Set {setNumber}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 font-medium">{exam.subject}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-gray-700 dark:text-gray-300 mt-0.5 sm:mt-1 font-medium truncate">{exam.subject}</p>
             </div>
             
             {/* Timer Stats */}
-            <div className="flex items-center gap-3 md:gap-6">
-              <div className="flex items-center gap-2 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/50 dark:to-red-900/50 px-4 py-2 rounded-xl border-2 border-orange-300 dark:border-orange-700">
-                <svg className="w-5 h-5 text-orange-700 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:pb-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/50 dark:to-red-900/50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border border-orange-300 sm:border-2 dark:border-orange-700 flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-700 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <div className={`text-base md:text-lg font-bold ${timeLeft < 300 ? 'text-red-600 dark:text-red-400 animate-pulse' : 'text-orange-700 dark:text-orange-400'}`}>
+                  <div className={`text-xs sm:text-sm md:text-base lg:text-lg font-bold ${timeLeft < 300 ? 'text-red-600 dark:text-red-400 animate-pulse' : 'text-orange-700 dark:text-orange-400'}`}>
                     {formatTime(timeLeft)}
                   </div>
-                  <div className="text-[10px] text-gray-700 dark:text-gray-300 font-medium">Total Time</div>
+                  <div className="text-[8px] sm:text-[10px] text-gray-700 dark:text-gray-300 font-medium">Total Time</div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 px-4 py-2 rounded-xl border-2 border-green-300 dark:border-green-700">
-                <svg className="w-5 h-5 text-green-700 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border border-green-300 sm:border-2 dark:border-green-700 flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-700 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <div>
-                  <div className={`text-base md:text-lg font-bold ${questionTimeLeft <= 10 ? 'text-red-600 dark:text-red-400 animate-pulse' : questionTimeLeft <= 30 ? 'text-orange-600 dark:text-orange-400' : 'text-green-700 dark:text-green-400'}`}>
+                  <div className={`text-xs sm:text-sm md:text-base lg:text-lg font-bold ${questionTimeLeft <= 10 ? 'text-red-600 dark:text-red-400 animate-pulse' : questionTimeLeft <= 30 ? 'text-orange-600 dark:text-orange-400' : 'text-green-700 dark:text-green-400'}`}>
                     {questionTimeLeft}s
                   </div>
-                  <div className="text-[10px] text-gray-700 dark:text-gray-300 font-medium">Question</div>
+                  <div className="text-[8px] sm:text-[10px] text-gray-700 dark:text-gray-300 font-medium">Question</div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 px-4 py-2 rounded-xl border-2 border-blue-300 dark:border-blue-700">
-                <svg className="w-5 h-5 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border border-blue-300 sm:border-2 dark:border-blue-700 flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <div className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-400">
+                  <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-blue-700 dark:text-blue-400">
                     {getAnsweredQuestionsCount()}/{exam.questions.length}
                   </div>
-                  <div className="text-[10px] text-gray-700 dark:text-gray-300 font-medium">Answered</div>
+                  <div className="text-[8px] sm:text-[10px] text-gray-700 dark:text-gray-300 font-medium">Answered</div>
                 </div>
               </div>
             </div>
           </div>
           
           {/* Progress Bar */}
-          <div className="mt-4">
+          <div className="mt-2 sm:mt-3 md:mt-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Progress</span>
-              <span className="text-xs font-bold text-blue-700 dark:text-blue-400">{Math.round(getProgress())}%</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300">Progress</span>
+              <span className="text-[10px] sm:text-xs font-bold text-blue-700 dark:text-blue-400">{Math.round(getProgress())}%</span>
             </div>
-            <div className="w-full bg-gray-300 dark:bg-slate-700 rounded-full h-3 overflow-hidden border-2 border-gray-400 dark:border-slate-600">
+            <div className="w-full bg-gray-300 dark:bg-slate-700 rounded-full h-2 sm:h-2.5 md:h-3 overflow-hidden border border-gray-400 sm:border-2 dark:border-slate-600">
               <div 
                 className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 rounded-full transition-all duration-500 ease-out shadow-lg"
                 style={{ width: `${getProgress()}%` }}
@@ -759,70 +760,70 @@ const TakeExam = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-5 md:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {/* Question Panel */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-slate-800 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-gray-200 dark:border-slate-700 p-6 md:p-8 transition-all duration-300 hover:shadow-2xl">
+            <div className="bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 sm:border-2 dark:border-slate-700 p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-300 hover:shadow-2xl">
               {/* Question Header */}
-              <div className="mb-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+              <div className="mb-4 sm:mb-5 md:mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-lg shadow-lg flex-shrink-0">
                       {currentQuestion + 1}
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="min-w-0">
+                      <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
                         Question {currentQuestion + 1}
                       </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">of {exam.questions.length} questions</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">of {exam.questions.length} questions</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-4 py-2 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-800/60 dark:to-yellow-800/60 text-amber-800 dark:text-amber-200 rounded-xl text-sm font-bold border-2 border-amber-300 dark:border-amber-700 shadow-sm">
-                      <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <span className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-800/60 dark:to-yellow-800/60 text-amber-800 dark:text-amber-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold border border-amber-300 sm:border-2 dark:border-amber-700 shadow-sm flex items-center gap-1 whitespace-nowrap">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                      {currentQ.marks} Mark{currentQ.marks !== 1 ? 's' : ''}
+                      <span>{currentQ.marks} Mark{currentQ.marks !== 1 ? 's' : ''}</span>
                     </span>
                   </div>
                 </div>
                 
                 {skippedQuestions.has(currentQuestion) && (
-                  <div className="mb-6 p-4 bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/50 dark:to-pink-900/50 border-l-4 border-red-600 dark:border-red-500 rounded-r-xl shadow-md animate-pulse">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-6 h-6 text-red-700 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-4 sm:mb-5 md:mb-6 p-3 sm:p-4 bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/50 dark:to-pink-900/50 border-l-4 border-red-600 dark:border-red-500 rounded-r-lg sm:rounded-r-xl shadow-md animate-pulse">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-700 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p className="text-red-900 dark:text-red-200 text-sm font-semibold">
+                      <p className="text-red-900 dark:text-red-200 text-xs sm:text-sm font-semibold">
                         ⏰ Time expired for this question. You cannot answer it anymore.
                       </p>
                     </div>
                   </div>
                 )}
                 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-blue-900/30 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-800">
-                  <p className="text-gray-900 dark:text-gray-100 text-lg md:text-xl leading-relaxed font-medium">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-blue-900/30 p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-blue-200 sm:border-2 dark:border-blue-800">
+                  <p className="text-gray-900 dark:text-gray-100 text-sm sm:text-base md:text-lg leading-relaxed font-medium break-words">
                     {currentQ.question}
                   </p>
                 </div>
               </div>
 
               {/* Options */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {currentQ.options.map((option, index) => (
                   <label
                     key={index}
-                    className={`group block p-5 border-2 rounded-xl transition-all duration-200 transform ${
+                    className={`group block p-3 sm:p-4 md:p-5 border border-gray-300 sm:border-2 dark:border-slate-600 rounded-lg sm:rounded-xl transition-all duration-200 transform ${
                       skippedQuestions.has(currentQuestion)
                         ? 'border-gray-400 dark:border-slate-600 bg-gray-200 dark:bg-slate-700/70 cursor-not-allowed opacity-70'
                         : answers[currentQuestion] === index
-                        ? 'border-blue-600 dark:border-blue-500 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 shadow-lg scale-[1.02]'
+                        ? 'border-blue-600 dark:border-blue-500 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 shadow-lg scale-[1.01] sm:scale-[1.02]'
                         : 'border-gray-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer hover:scale-[1.01] hover:shadow-md bg-white dark:bg-slate-800/50'
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-2.5 sm:gap-3 md:gap-4">
+                      <div className="flex-shrink-0 mt-0.5 sm:mt-1">
                         <input
                           type="radio"
                           name={`question-${currentQuestion}`}
@@ -830,19 +831,19 @@ const TakeExam = () => {
                           checked={answers[currentQuestion] === index}
                           onChange={() => handleAnswerSelect(currentQuestion, index)}
                           disabled={skippedQuestions.has(currentQuestion)}
-                          className="h-5 w-5 text-blue-600 dark:text-blue-500 focus:ring-2 focus:ring-blue-500 border-gray-400 dark:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500 focus:ring-2 focus:ring-blue-500 border-gray-400 dark:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-sm font-bold ${
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-1.5 sm:gap-2">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-md sm:rounded-lg text-xs sm:text-sm font-bold flex-shrink-0 ${
                             answers[currentQuestion] === index
                               ? 'bg-blue-600 dark:bg-blue-500 text-white'
                               : 'bg-gray-300 dark:bg-slate-600 text-gray-800 dark:text-gray-200'
                           }`}>
                             {String.fromCharCode(65 + index)}
                           </span>
-                          <span className="text-gray-900 dark:text-gray-100 text-base md:text-lg font-medium">
+                          <span className="text-gray-900 dark:text-gray-100 text-sm sm:text-base md:text-lg font-medium break-words">
                             {option.text}
                           </span>
                         </div>
@@ -853,13 +854,13 @@ const TakeExam = () => {
               </div>
 
               {/* Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t-2 border-gray-300 dark:border-slate-700">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 mt-5 sm:mt-6 md:mt-8 pt-4 sm:pt-5 md:pt-6 border-t border-gray-300 sm:border-t-2 dark:border-slate-700">
                 <button
                   onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                   disabled={currentQuestion === 0}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 text-gray-900 dark:text-gray-100 rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold border-2 border-gray-400 dark:border-slate-500 flex items-center justify-center gap-2 group"
+                  className="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 text-gray-900 dark:text-gray-100 text-sm sm:text-base rounded-lg sm:rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold border border-gray-400 sm:border-2 dark:border-slate-500 flex items-center justify-center gap-2 group"
                 >
-                  <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   Previous
@@ -868,10 +869,10 @@ const TakeExam = () => {
                 <button
                   onClick={() => setCurrentQuestion(Math.min(exam.questions.length - 1, currentQuestion + 1))}
                   disabled={currentQuestion === exam.questions.length - 1}
-                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold border-2 border-blue-700 dark:border-blue-400 flex items-center justify-center gap-2 group"
+                  className="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white text-sm sm:text-base rounded-lg sm:rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold border border-blue-700 sm:border-2 dark:border-blue-400 flex items-center justify-center gap-2 group"
                 >
                   Next
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -881,25 +882,25 @@ const TakeExam = () => {
 
           {/* Question Navigation Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-slate-800 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-gray-200 dark:border-slate-700 p-6 sticky top-24">
-              <div className="flex items-center gap-2 mb-6">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 sm:border-2 dark:border-slate-700 p-4 sm:p-5 md:p-6 sticky top-20 sm:top-24">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                   Questions
                 </h3>
               </div>
               
               {/* Question Grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mb-6">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
                 {exam.questions.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentQuestion(index)}
-                    className={`relative w-full aspect-square rounded-xl text-sm font-bold transition-all duration-200 transform hover:scale-110 border-2 ${
+                    className={`relative w-full aspect-square rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 transform hover:scale-105 sm:hover:scale-110 border sm:border-2 ${
                       currentQuestion === index
-                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white shadow-lg scale-110 border-blue-700 dark:border-blue-400'
+                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white shadow-lg scale-105 sm:scale-110 border-blue-700 dark:border-blue-400'
                         : skippedQuestions.has(index)
                         ? 'bg-gradient-to-br from-red-200 to-red-300 dark:from-red-800/70 dark:to-red-700/70 text-red-900 dark:text-red-200 border-red-400 dark:border-red-600'
                         : answers[index] !== null
@@ -909,28 +910,28 @@ const TakeExam = () => {
                   >
                     {index + 1}
                     {currentQuestion === index && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-pink-500 dark:bg-pink-400 rounded-full animate-ping"></div>
+                      <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-pink-500 dark:bg-pink-400 rounded-full animate-ping"></div>
                     )}
                   </button>
                 ))}
               </div>
 
               {/* Legend */}
-              <div className="space-y-3 text-sm mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700/70 dark:to-blue-900/30 p-4 rounded-xl border-2 border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-green-200 to-emerald-300 dark:from-green-800/70 dark:to-emerald-700/70 flex-shrink-0 shadow-sm border-2 border-green-400 dark:border-green-600"></div>
+              <div className="space-y-2 sm:space-y-2.5 md:space-y-3 text-xs sm:text-sm mb-4 sm:mb-5 md:mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700/70 dark:to-blue-900/30 p-3 sm:p-3.5 md:p-4 rounded-lg sm:rounded-xl border border-blue-200 sm:border-2 dark:border-blue-800">
+                <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-br from-green-200 to-emerald-300 dark:from-green-800/70 dark:to-emerald-700/70 flex-shrink-0 shadow-sm border border-green-400 sm:border-2 dark:border-green-600"></div>
                   <span className="text-gray-800 dark:text-gray-200 font-semibold">Answered</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 flex-shrink-0 shadow-sm border-2 border-gray-400 dark:border-slate-600"></div>
+                <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gray-200 dark:bg-slate-700 flex-shrink-0 shadow-sm border border-gray-400 sm:border-2 dark:border-slate-600"></div>
                   <span className="text-gray-800 dark:text-gray-200 font-semibold">Not Answered</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-red-200 to-red-300 dark:from-red-800/70 dark:to-red-700/70 flex-shrink-0 shadow-sm border-2 border-red-400 dark:border-red-600"></div>
+                <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-br from-red-200 to-red-300 dark:from-red-800/70 dark:to-red-700/70 flex-shrink-0 shadow-sm border border-red-400 sm:border-2 dark:border-red-600"></div>
                   <span className="text-gray-800 dark:text-gray-200 font-semibold">Time Expired</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 flex-shrink-0 shadow-sm border-2 border-blue-700 dark:border-blue-400"></div>
+                <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 flex-shrink-0 shadow-sm border border-blue-700 sm:border-2 dark:border-blue-400"></div>
                   <span className="text-gray-800 dark:text-gray-200 font-semibold">Current</span>
                 </div>
               </div>
@@ -939,11 +940,11 @@ const TakeExam = () => {
               <button
                 onClick={handleSubmitExam}
                 disabled={submitting}
-                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-500 dark:to-emerald-500 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 dark:hover:from-green-600 dark:hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 border-2 border-green-700 dark:border-green-400"
+                className="w-full py-3 sm:py-3.5 md:py-4 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-500 dark:to-emerald-500 text-white text-sm sm:text-base md:text-lg rounded-lg sm:rounded-xl hover:from-green-700 hover:to-emerald-700 dark:hover:from-green-600 dark:hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 border border-green-700 sm:border-2 dark:border-green-400"
               >
                 {submitting ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -951,7 +952,7 @@ const TakeExam = () => {
                   </>
                 ) : (
                   <>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Submit Exam

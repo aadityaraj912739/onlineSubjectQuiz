@@ -187,23 +187,23 @@
 /* Custom components */
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium py-2.5 px-5 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-dark-900 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium py-2 px-4 sm:py-2.5 sm:px-5 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-dark-900 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base;
   }
   
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 text-gray-900 dark:text-gray-100 font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 text-gray-900 dark:text-gray-100 font-medium py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm sm:text-base;
   }
   
   .btn-danger {
-    @apply bg-danger-500 hover:bg-danger-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2;
+    @apply bg-danger-500 hover:bg-danger-600 text-white font-medium py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 text-sm sm:text-base;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 transition-all duration-200;
+    @apply w-full px-2.5 py-2 sm:px-3 sm:py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 transition-all duration-200 text-sm sm:text-base;
   }
   
   .card {
-    @apply bg-white dark:bg-dark-850 rounded-xl shadow-sm border border-gray-200 dark:border-dark-700 p-6 transition-all duration-300;
+    @apply bg-white dark:bg-dark-850 rounded-xl shadow-sm border border-gray-200 dark:border-dark-700 p-4 sm:p-6 transition-all duration-300;
     backdrop-filter: blur(10px);
   }
   
@@ -255,6 +255,28 @@ body {
   @apply font-sans antialiased;
   @apply bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-950 dark:via-dark-925 dark:to-dark-900;
   min-height: 100vh;
+  /* Prevent text size adjustment on mobile devices */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Mobile-first responsive base font sizes */
+html {
+  font-size: 14px; /* Base for mobile */
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 15px; /* Tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px; /* Desktop */
+  }
 }
 
 /* Smooth dark mode transitions */
@@ -287,7 +309,7 @@ body {
 
 /* Custom radio buttons for MCQ options */
 .mcq-option {
-  @apply relative block w-full p-4 border border-gray-200 dark:border-dark-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-primary-300 dark:hover:border-primary-600;
+  @apply relative block w-full p-3 sm:p-4 border border-gray-200 dark:border-dark-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-primary-300 dark:hover:border-primary-600;
 }
 
 .mcq-option input {
