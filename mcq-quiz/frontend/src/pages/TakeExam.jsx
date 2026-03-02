@@ -33,6 +33,44 @@ const TakeExam = () => {
   const hasLeftTabRef = useRef(false); // Track if user has left the tab
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
 
+  // Auto-save answers to localStorage
+  const saveAnswersToLocalStorage = useCallback((answersToSave) => {
+    try {
+      const saveData = {
+        answers: answersToSave,
+        timestamp: new Date().toISOString(),
+        examId: examId
+      };
+      localStorage.setItem(`exam_answers_${examId}`, JSON.stringify(saveData));
+    } catch (error) {
+      console.error('Failed to save answers to localStorage:', error);
+    }
+  }, [examId]);
+
+  // Load answers from localStorage
+  const loadAnswersFromLocalStorage = useCallback(() => {
+    try {
+      const savedData = localStorage.getItem(`exam_answers_${examId}`);
+      if (savedData) {
+        const { answers: savedAnswers, timestamp } = JSON.parse(savedData);
+        console.log(`Restored answers from ${timestamp}`);
+        return savedAnswers;
+      }
+    } catch (error) {
+      console.error('Failed to load answers from localStorage:', error);
+    }
+    return null;
+  }, [examId]);
+
+  // Clear answers from localStorage
+  const clearAnswersFromLocalStorage = useCallback(() => {
+    try {
+      localStorage.removeItem(`exam_answers_${examId}`);
+    } catch (error) {
+      console.error('Failed to clear answers from localStorage:', error);
+    }
+  }, [examId]);
+
   const handleSubmitExam = useCallback(async (autoSubmit = false, reason = '') => {
     if (submitting || hasSubmittedRef.current) return;
     
@@ -41,6 +79,8 @@ const TakeExam = () => {
     
     if (autoSubmit) {
       toast.error(`Exam auto-submitted: ${reason}`);
+      // Save current answers before auto-submit
+      saveAnswersToLocalStorage(answers);
     }
     
     try {
@@ -74,6 +114,9 @@ const TakeExam = () => {
         questionOrder: questionOrder
       });
 
+      // Clear saved answers after successful submit
+      clearAnswersFromLocalStorage();
+      
       toast.success('Exam submitted successfully!');
       navigate('/student', { 
         state: { 
@@ -85,7 +128,7 @@ const TakeExam = () => {
       toast.error(error.response?.data?.message || 'Failed to submit exam');
       setSubmitting(false);
     }
-  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate]);
+  }, [submitting, examStartTime, exam, answers, api, setNumber, navigate, saveAnswersToLocalStorage, clearAnswersFromLocalStorage]);
 
   const fetchExamQuestions = useCallback(async () => {
     try {
@@ -100,6 +143,19 @@ const TakeExam = () => {
       response.data.questions.forEach((_, index) => {
         initialAnswers[index] = null;
       });
+      
+      // Try to restore answers from localStorage
+      const savedAnswers = loadAnswersFromLocalStorage();
+      if (savedAnswers) {
+        // Merge saved answers with initial answers
+        Object.keys(savedAnswers).forEach(key => {
+          if (initialAnswers.hasOwnProperty(key)) {
+            initialAnswers[key] = savedAnswers[key];
+          }
+        });
+        toast.success('Previous answers restored!');
+      }
+      
       setAnswers(initialAnswers);
       
       // Set timer for first question
@@ -116,11 +172,23 @@ const TakeExam = () => {
     } finally {
       setLoading(false);
     }
-  }, [api, examId, navigate]);
+  }, [api, examId, navigate, loadAnswersFromLocalStorage]);
 
   useEffect(() => {
     fetchExamQuestions();
   }, [fetchExamQuestions]);
+
+  // Periodic auto-save (every 30 seconds)
+  useEffect(() => {
+    if (!exam || !answers || submitting) return;
+    
+    const autoSaveInterval = setInterval(() => {
+      saveAnswersToLocalStorage(answers);
+      console.log('Answers auto-saved at', new Date().toLocaleTimeString());
+    }, 30000); // Save every 30 seconds
+    
+    return () => clearInterval(autoSaveInterval);
+  }, [exam, answers, submitting, saveAnswersToLocalStorage]);
 
   // Anti-Cheating: Request fullscreen when exam starts
   useEffect(() => {
@@ -170,9 +238,11 @@ const TakeExam = () => {
     
     const handleVisibilityChange = () => {
       if (document.hidden && !submitting && !hasSubmittedRef.current) {
-        // User left the tab - immediately count as violation
+        // User left the tab - immediately save answers and count as violation
         if (!hasLeftTabRef.current) {
           hasLeftTabRef.current = true;
+          // Auto-save answers before warning
+          saveAnswersToLocalStorage(answers);
           handleViolation('Switched to another tab/window');
         }
       } else if (!document.hidden) {
@@ -188,7 +258,7 @@ const TakeExam = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exam, loading, submitting]);
+  }, [exam, loading, submitting, answers]);
 
   // Anti-Cheating: Disable copy-paste and keyboard shortcuts
   useEffect(() => {
@@ -418,10 +488,15 @@ const TakeExam = () => {
       return;
     }
     
-    setAnswers(prev => ({
-      ...prev,
+    const updatedAnswers = {
+      ...answers,
       [questionIndex]: optionIndex
-    }));
+    };
+    
+    setAnswers(updatedAnswers);
+    
+    // Auto-save to localStorage
+    saveAnswersToLocalStorage(updatedAnswers);
   };
 
   const formatTime = (seconds) => {
