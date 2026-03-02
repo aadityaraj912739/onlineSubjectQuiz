@@ -198,7 +198,8 @@ const TakeExam = () => {
     }, 30000); // Save every 30 seconds
     
     return () => clearInterval(autoSaveInterval);
-  }, [exam, answers, submitting, saveAnswersToLocalStorage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exam, answers, submitting]);
 
   // Anti-Cheating: Request fullscreen when exam starts
   useEffect(() => {
