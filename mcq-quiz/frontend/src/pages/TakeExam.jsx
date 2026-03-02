@@ -85,7 +85,9 @@ const TakeExam = () => {
       toast.error(`Exam auto-submitted: ${reason}`);
       // Use ref answers which are always up-to-date
       currentAnswers = answersRef.current;
-      console.log('Auto-submit using answers:', currentAnswers);
+      console.log('🚨 AUTO-SUBMIT TRIGGERED');
+      console.log('📝 currentAnswers from ref:', currentAnswers);
+      console.log('📊 Number of answered questions:', Object.keys(currentAnswers).filter(k => currentAnswers[k] !== null).length);
     }
     
     try {
@@ -109,17 +111,23 @@ const TakeExam = () => {
         };
       });
 
-      console.log('Submitting formatted answers:', formattedAnswers.filter(a => a.selectedOption !== null && a.selectedOption !== undefined).length, 'answered questions');
+      const answeredCount = formattedAnswers.filter(a => a.selectedOption !== null && a.selectedOption !== undefined).length;
+      console.log('✅ Formatted answers ready:', answeredCount, 'answered questions');
+      console.log('📦 Full formatted answers:', JSON.stringify(formattedAnswers, null, 2));
 
       const questionOrder = exam.questions.map(q => q._id);
 
-      const response = await api.post('/results/submit', {
+      const payload = {
         examId: exam._id,
         answers: formattedAnswers,
         timeTaken: timeTaken,
         setNumber: setNumber,
         questionOrder: questionOrder
-      });
+      };
+      
+      console.log('🚀 Sending payload to server:', JSON.stringify(payload, null, 2));
+      
+      const response = await api.post('/results/submit', payload);
 
       // Clear saved answers after successful submit
       clearAnswersFromLocalStorage();
@@ -255,7 +263,8 @@ const TakeExam = () => {
           hasLeftTabRef.current = true;
           // Auto-save latest answers from ref before warning
           saveAnswersToLocalStorage(answersRef.current);
-          console.log('Tab switched - saved answers:', Object.keys(answersRef.current).filter(k => answersRef.current[k] !== null).length, 'answers');
+          console.log('🔄 Tab switched! Current answersRef:', answersRef.current);
+          console.log('📊 Answered questions:', Object.keys(answersRef.current).filter(k => answersRef.current[k] !== null).length);
           handleViolation('Switched to another tab/window');
         }
       } else if (!document.hidden) {
@@ -509,6 +518,9 @@ const TakeExam = () => {
     // Update both state and ref
     setAnswers(updatedAnswers);
     answersRef.current = updatedAnswers; // Keep ref updated for auto-submit
+    
+    console.log('✏️ Answer selected - Q' + questionIndex + ': Option ' + optionIndex);
+    console.log('📋 Updated answersRef:', answersRef.current);
     
     // Auto-save to localStorage
     saveAnswersToLocalStorage(updatedAnswers);
