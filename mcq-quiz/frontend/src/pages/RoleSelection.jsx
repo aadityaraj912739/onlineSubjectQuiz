@@ -69,8 +69,8 @@ const RoleSelection = () => {
       const response = await api.post('/auth/google/set-role', roleData);
       
       if (response.data.user) {
-        // Force refresh user data
-        const userResponse = await api.get('/auth/me');
+        // Refresh user data in background
+        await api.get('/auth/me');
         
         toast.success('Role set successfully!');
         
