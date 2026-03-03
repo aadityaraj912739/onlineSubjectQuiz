@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 
@@ -11,6 +12,7 @@ import Loading from './components/Loading.jsx';
 // Pages
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import RoleSelection from './pages/RoleSelection.jsx';
 import TeacherDashboard from './pages/TeacherDashboard.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
 import CreateExam from './pages/CreateExam.jsx';
@@ -49,7 +51,11 @@ const PublicRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={user.role === 'teacher' ? '/teacher' : '/student'} replace />;
+    // If user doesn't have a role, allow access to role selection
+    if (!user?.role) {
+      return <Navigate to="/select-role" replace />;
+    }
+    return <Navigate to={user.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} replace />;
   }
 
   return children;
@@ -86,7 +92,7 @@ const NotFound = () => {
           </button>
           {isAuthenticated && (
             <button 
-              onClick={() => navigate(user?.role === 'teacher' ? '/teacher' : '/student')}
+              onClick={() => navigate(user?.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard')}
               className="btn-primary inline-flex items-center space-x-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,9 +138,19 @@ const AppContent = () => {
           } 
         />
 
+        {/* Role Selection Route (Protected but no role required) */}
+        <Route 
+          path="/select-role" 
+          element={
+            <ProtectedRoute>
+              <RoleSelection />
+            </ProtectedRoute>
+          } 
+        />
+
         {/* Protected Routes */}
         <Route 
-          path="/teacher" 
+          path="/teacher-dashboard" 
           element={
             <ProtectedRoute requiredRole="teacher">
               <TeacherDashboard />
@@ -142,13 +158,25 @@ const AppContent = () => {
           } 
         />
         
+        {/* Alias for backward compatibility */}
         <Route 
-          path="/student" 
+          path="/teacher" 
+          element={<Navigate to="/teacher-dashboard" replace />}
+        />
+        
+        <Route 
+          path="/student-dashboard" 
           element={
             <ProtectedRoute requiredRole="student">
               <StudentDashboard />
             </ProtectedRoute>
           } 
+        />
+
+        {/* Alias for backward compatibility */}
+        <Route 
+          path="/student" 
+          element={<Navigate to="/student-dashboard" replace />}
         />
 
         <Route 
@@ -219,7 +247,11 @@ const AppContent = () => {
           path="/" 
           element={
             isAuthenticated ? (
-              <Navigate to={user?.role === 'teacher' ? '/teacher' : '/student'} replace />
+              user?.role ? (
+                <Navigate to={user.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} replace />
+              ) : (
+                <Navigate to="/select-role" replace />
+              )
             ) : (
               <Navigate to="/login" replace />
             )
@@ -329,13 +361,15 @@ const AppContent = () => {
 // Main App Component
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
+      <ThemeProvider>
         <Router>
-          <AppContent />
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
         </Router>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }
 

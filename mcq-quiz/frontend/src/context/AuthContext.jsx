@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config/api';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const navigate = useNavigate();
 
   // Set up axios defaults
   axios.defaults.baseURL = API_BASE_URL;
@@ -25,13 +27,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get('/auth/me');
       setUser(response.data.user);
+      return response.data.user;
     } catch (error) {
       // Error fetching user
       logout();
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
+  const refetchUser = useCallback(async () => {
+    try {
+      const response = await axios.get('/auth/me');
+      setUser(response.data.user);
+      return response.data.user;
+    } catch (error) {
+      console.error('Error refetching user:', error);
+      return null;
+    }
+  }, []);
   
   useEffect(() => {
     if (token) {
@@ -54,13 +69,21 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       
       toast.success('Login successful!');
+      
+      // Navigate based on role
+      if (userData.role === 'teacher') {
+        navigate('/teacher-dashboard');
+      } else if (userData.role === 'student') {
+        navigate('/student-dashboard');
+      }
+      
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
       return { success: false, message };
     }
-  }, []);
+  }, [navigate]);
 
   const register = useCallback(async (userData) => {
     try {
@@ -73,13 +96,53 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       
       toast.success('Registration successful!');
+      
+      // Navigate based on role
+      if (newUser.role === 'teacher') {
+        navigate('/teacher-dashboard');
+      } else if (newUser.role === 'student') {
+        navigate('/student-dashboard');
+      }
+      
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
       toast.error(message);
       return { success: false, message };
     }
-  }, []);
+  }, [navigate]);
+
+  const googleLogin = useCallback(async (credential) => {
+    try {
+      const response = await axios.post('/auth/google', { credential });
+      const { token: newToken, user: userData, needsRole } = response.data;
+      
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(userData);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      
+      toast.success('Google login successful!');
+      
+      // If user needs to select role, navigate to role selection page
+      if (needsRole) {
+        navigate('/select-role');
+      } else {
+        // Navigate based on existing role
+        if (userData.role === 'teacher') {
+          navigate('/teacher-dashboard');
+        } else if (userData.role === 'student') {
+          navigate('/student-dashboard');
+        }
+      }
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Google login failed';
+      toast.error(message);
+      return { success: false, message };
+    }
+  }, [navigate]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -109,10 +172,12 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     login,
     register,
+    googleLogin,
     logout,
     updateProfile,
+    refetchUser,
     api: axios, // Export the configured axios instance
-  }), [user, loading, token, login, register, logout, updateProfile]);
+  }), [user, loading, token, login, register, googleLogin, logout, updateProfile, refetchUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

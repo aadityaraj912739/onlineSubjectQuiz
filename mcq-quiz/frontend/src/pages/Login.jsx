@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
+import { GoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +14,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,6 +62,22 @@ const Login = () => {
       setErrors({ submit: result.message });
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    const result = await googleLogin(credentialResponse.credential);
+    
+    if (!result.success) {
+      setErrors({ submit: result.message });
+      setLoading(false);
+    }
+    // If successful, navigation will be handled by AuthContext
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google login failed. Please try again.');
+    setErrors({ submit: 'Google login failed. Please try again.' });
   };
 
   const fillDemoCredentials = (type) => {
@@ -204,6 +222,32 @@ const Login = () => {
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
+          </div>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-dark-600"></div>
+            </div>
+            <div className="relative flex justify-center text-xs sm:text-sm">
+              <span className="px-2 bg-white/90 dark:bg-dark-850/90 text-gray-500 dark:text-gray-400">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Login Button */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              theme="outline"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              logo_alignment="left"
+            />
           </div>
 
           {/* Register Link */}
