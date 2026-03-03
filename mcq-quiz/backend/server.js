@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const detect = require('detect-port').default;
+const session = require('express-session');
+const passport = require('./config/passport');
 
 // Check for JWT_SECRET
 if (!process.env.JWT_SECRET) {
@@ -23,6 +25,21 @@ app.use(cors({
     ],
     credentials: true
 }));
+
+// Session middleware (required for passport)
+app.use(session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -16,13 +16,20 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: function() {
+            return !this.googleId; // Password not required for Google users
+        },
         minlength: 6
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple null values
     },
     role: {
         type: String,
         enum: ['teacher', 'student'],
-        required: true
+        required: false // Will be set after Google login
     },
     profileImage: {
         type: String,
@@ -65,26 +72,26 @@ const userSchema = new mongoose.Schema({
     department: {
         type: String,
         required: function() {
-            return this.role === 'teacher';
+            return this.role === 'teacher' && !this.googleId;
         }
     },
     // For students
     rollNumber: {
         type: String,
         required: function() {
-            return this.role === 'student';
+            return this.role === 'student' && !this.googleId;
         }
     },
     class: {
         type: String,
         required: function() {
-            return this.role === 'student';
+            return this.role === 'student' && !this.googleId;
         }
     },
     semester: {
         type: String,
         required: function() {
-            return this.role === 'student';
+            return this.role === 'student' && !this.googleId;
         }
     }
 }, {
@@ -93,7 +100,7 @@ const userSchema = new mongoose.Schema({
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+    if (!this.isModified('password') || !this.password) return next();
     
     try {
         const salt = await bcrypt.genSalt(10);
@@ -106,6 +113,7 @@ userSchema.pre('save', async function(next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
+    if (!this.password) return false; // No password for Google users
     return await bcrypt.compare(candidatePassword, this.password);
 };
 

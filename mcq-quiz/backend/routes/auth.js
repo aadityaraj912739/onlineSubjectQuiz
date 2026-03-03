@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 const { uploadProfilePicture, deleteFromCloudinary } = require('../config/cloudinary');
+const passport = require('../config/passport');
 
 const router = express.Router();
 
@@ -115,6 +116,150 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error during login' });
+    }
+});
+
+// @route   POST /api/auth/google
+// @desc    Google OAuth authentication
+// @access  Public
+router.post('/google', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        
+        if (!credential) {
+            return res.status(400).json({ message: 'Google credential is required' });
+        }
+
+        // Decode Google credential (JWT)
+        const { OAuth2Client } = require('google-auth-library');
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+        
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name, picture } = payload;
+
+        // Check if user already exists with Google ID
+        let user = await User.findOne({ googleId });
+        
+        if (!user) {
+            // Check if user with same email exists
+            user = await User.findOne({ email });
+            
+            if (user) {
+                // Link Google account to existing user
+                user.googleId = googleId;
+                if (!user.profileImage && picture) {
+                    user.profileImage = picture;
+                }
+                await user.save();
+            } else {
+                // Create new user - role will be set later
+                user = new User({
+                    googleId,
+                    name,
+                    email,
+                    profileImage: picture || '',
+                });
+                await user.save();
+            }
+        }
+
+        // Generate token
+        const token = generateToken(user._id);
+
+        res.json({
+            message: 'Google authentication successful',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department,
+                rollNumber: user.rollNumber,
+                class: user.class,
+                profileImage: user.profileImage,
+                linkedin: user.linkedin,
+                leetcode: user.leetcode,
+                github: user.github,
+                country: user.country,
+                state: user.state,
+                college: user.college,
+                branch: user.branch,
+                semester: user.semester
+            },
+            needsRole: !user.role // Indicates if role selection is needed
+        });
+    } catch (error) {
+        console.error('Google authentication error:', error);
+        res.status(500).json({ message: 'Google authentication failed', error: error.message });
+    }
+});
+
+// @route   POST /api/auth/google/set-role
+// @desc    Set role for Google authenticated user
+// @access  Private
+router.post('/google/set-role', auth, async (req, res) => {
+    try {
+        const { role, department, rollNumber, class: userClass, semester } = req.body;
+
+        if (!role || !['teacher', 'student'].includes(role)) {
+            return res.status(400).json({ message: 'Valid role (teacher/student) is required' });
+        }
+
+        const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if user already has a role
+        if (user.role) {
+            return res.status(400).json({ message: 'User role is already set' });
+        }
+
+        // Set role
+        user.role = role;
+
+        // Set role-specific fields
+        if (role === 'teacher') {
+            user.department = department || '';
+        } else if (role === 'student') {
+            user.rollNumber = rollNumber || '';
+            user.class = userClass || '';
+            user.semester = semester || '';
+        }
+
+        await user.save();
+
+        res.json({
+            message: 'Role set successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department,
+                rollNumber: user.rollNumber,
+                class: user.class,
+                profileImage: user.profileImage,
+                linkedin: user.linkedin,
+                leetcode: user.leetcode,
+                github: user.github,
+                country: user.country,
+                state: user.state,
+                college: user.college,
+                branch: user.branch,
+                semester: user.semester
+            }
+        });
+    } catch (error) {
+        console.error('Set role error:', error);
+        res.status(500).json({ message: 'Server error while setting role' });
     }
 });
 
