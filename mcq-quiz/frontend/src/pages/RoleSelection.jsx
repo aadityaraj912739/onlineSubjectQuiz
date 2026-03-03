@@ -13,7 +13,7 @@ const RoleSelection = () => {
     class: '',
     semester: ''
   });
-  const { api, user } = useAuth();
+  const { api, user, refetchUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -68,18 +68,29 @@ const RoleSelection = () => {
 
       const response = await api.post('/auth/google/set-role', roleData);
       
+      console.log('[RoleSelection] Role set response:', response.data);
+      
       if (response.data.user) {
-        // Refresh user data in background
-        await api.get('/auth/me');
-        
         toast.success('Role set successfully!');
         
-        // Navigate to appropriate dashboard
-        const redirectPath = selectedRole === 'teacher' ? '/teacher-dashboard' : '/student-dashboard';
-        navigate(redirectPath, { replace: true });
+        // Refresh user data to update role in context
+        console.log('[RoleSelection] Refetching user data...');
+        const updatedUser = await refetchUser();
+        console.log('[RoleSelection] Updated user:', updatedUser);
+        
+        // Navigate to appropriate dashboard based on updated user role
+        if (updatedUser && updatedUser.role) {
+          const redirectPath = updatedUser.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard';
+          console.log('[RoleSelection] Navigating to:', redirectPath);
+          navigate(redirectPath, { replace: true });
+        } else {
+          console.error('[RoleSelection] Updated user has no role:', updatedUser);
+          toast.error('Role was set but navigation failed. Please refresh the page.');
+        }
       }
     } catch (error) {
-      console.error('Role selection error:', error);
+      console.error('[RoleSelection] Role selection error:', error);
+      console.error('[RoleSelection] Error response:', error.response?.data);
       const message = error.response?.data?.message || 'Failed to set role. Please try again.';
       toast.error(message);
     } finally {
@@ -112,8 +123,10 @@ const RoleSelection = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Teacher Card */}
             <div
-              onClick={() => handleRoleSelect('teacher')}
-              className={`relative cursor-pointer rounded-2xl p-8 transition-all duration-300 ${
+              onClick={() => !loading && handleRoleSelect('teacher')}
+              className={`relative rounded-2xl p-8 transition-all duration-300 ${
+                loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${
                 selectedRole === 'teacher'
                   ? 'bg-gradient-to-br from-primary-500 to-primary-700 text-white shadow-glow scale-105'
                   : 'bg-white dark:bg-dark-850 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500'
@@ -147,8 +160,10 @@ const RoleSelection = () => {
 
             {/* Student Card */}
             <div
-              onClick={() => handleRoleSelect('student')}
-              className={`relative cursor-pointer rounded-2xl p-8 transition-all duration-300 ${
+              onClick={() => !loading && handleRoleSelect('student')}
+              className={`relative rounded-2xl p-8 transition-all duration-300 ${
+                loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${
                 selectedRole === 'student'
                   ? 'bg-gradient-to-br from-primary-500 to-primary-700 text-white shadow-glow scale-105'
                   : 'bg-white dark:bg-dark-850 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500'

@@ -207,20 +207,29 @@ router.post('/google/set-role', auth, async (req, res) => {
     try {
         const { role, department, rollNumber, class: userClass, semester } = req.body;
 
+        console.log('[SET-ROLE] Request received:', { userId: req.user._id, role });
+
         if (!role || !['teacher', 'student'].includes(role)) {
+            console.log('[SET-ROLE] Invalid role provided:', role);
             return res.status(400).json({ message: 'Valid role (teacher/student) is required' });
         }
 
         const user = await User.findById(req.user._id);
         
         if (!user) {
+            console.log('[SET-ROLE] User not found:', req.user._id);
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Check if user already has a role
-        if (user.role) {
-            return res.status(400).json({ message: 'User role is already set' });
+        console.log('[SET-ROLE] Current user role:', user.role, 'Type:', typeof user.role);
+
+        // Check if user already has a role (but allow undefined/null to be set)
+        if (user.role && user.role !== '') {
+            console.log('[SET-ROLE] User role already set:', user.role);
+            return res.status(400).json({ message: 'User role is already set. Contact support to change your role.' });
         }
+
+        console.log('[SET-ROLE] Setting role to:', role);
 
         // Set role
         user.role = role;
