@@ -10,7 +10,6 @@ const ForumList = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [sortBy, setSortBy] = useState('recent');
     const { token, user } = useAuth();
 
     const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
