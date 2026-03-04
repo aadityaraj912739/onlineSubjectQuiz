@@ -36,7 +36,8 @@ async (accessToken, refreshToken, profile, done) => {
         if (user) {
             // Link Google account to existing user
             user.googleId = profile.id;
-            if (!user.profileImage && profile.photos && profile.photos.length > 0) {
+            // Update Google profile picture if user hasn't manually uploaded one
+            if (!user.profileImagePublicId && profile.photos && profile.photos.length > 0) {
                 user.profileImage = profile.photos[0].value;
             }
             await user.save();

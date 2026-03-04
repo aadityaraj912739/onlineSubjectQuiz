@@ -40,6 +40,8 @@ export const AuthProvider = ({ children }) => {
   const refetchUser = useCallback(async () => {
     try {
       const response = await axios.get('/auth/me');
+      console.log('[AuthContext] Refetch user response:', response.data.user);
+      console.log('[AuthContext] Profile image after refetch:', response.data.user.profileImage);
       setUser(response.data.user);
       return response.data.user;
     } catch (error) {
@@ -116,6 +118,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/auth/google', { credential });
       const { token: newToken, user: userData, needsRole } = response.data;
+      
+      console.log('[AuthContext] Google login response userData:', userData);
+      console.log('[AuthContext] Profile image from Google:', userData.profileImage);
       
       localStorage.setItem('token', newToken);
       setToken(newToken);

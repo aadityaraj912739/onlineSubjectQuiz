@@ -69,6 +69,8 @@ const RoleSelection = () => {
       const response = await api.post('/auth/google/set-role', roleData);
       
       console.log('[RoleSelection] Role set response:', response.data);
+      console.log('[RoleSelection] User from response:', response.data.user);
+      console.log('[RoleSelection] Profile image in response:', response.data.user?.profileImage);
       
       if (response.data.user) {
         toast.success('Role set successfully!');
@@ -77,6 +79,7 @@ const RoleSelection = () => {
         console.log('[RoleSelection] Refetching user data...');
         const updatedUser = await refetchUser();
         console.log('[RoleSelection] Updated user:', updatedUser);
+        console.log('[RoleSelection] Profile image after refetch:', updatedUser?.profileImage);
         
         // Navigate to appropriate dashboard based on updated user role
         if (updatedUser && updatedUser.role) {

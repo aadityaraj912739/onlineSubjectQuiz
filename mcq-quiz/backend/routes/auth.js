@@ -55,6 +55,7 @@ router.post('/register', async (req, res) => {
                 department: user.department,
                 rollNumber: user.rollNumber,
                 class: user.class,
+                profileImage: user.profileImage,
                 linkedin: user.linkedin,
                 leetcode: user.leetcode,
                 github: user.github,
@@ -104,6 +105,7 @@ router.post('/login', async (req, res) => {
                 department: user.department,
                 rollNumber: user.rollNumber,
                 class: user.class,
+                profileImage: user.profileImage,
                 linkedin: user.linkedin,
                 leetcode: user.leetcode,
                 github: user.github,
@@ -142,22 +144,39 @@ router.post('/google', async (req, res) => {
         const payload = ticket.getPayload();
         const { sub: googleId, email, name, picture } = payload;
 
+        console.log('[Google Auth] Payload received:', { googleId, email, name, picture: picture ? 'Present' : 'Missing' });
+
         // Check if user already exists with Google ID
         let user = await User.findOne({ googleId });
         
-        if (!user) {
+        if (user) {
+            // User exists with this Google ID
+            console.log('[Google Auth] Existing user found with googleId');
+            // Update Google profile picture if user hasn't manually uploaded one
+            if (!user.profileImagePublicId && picture) {
+                console.log('[Google Auth] Updating profile image from Google');
+                user.profileImage = picture;
+                await user.save();
+            } else {
+                console.log('[Google Auth] Not updating profile image. Manual upload:', !!user.profileImagePublicId, 'Google picture:', !!picture);
+            }
+        } else {
             // Check if user with same email exists
             user = await User.findOne({ email });
             
             if (user) {
+                console.log('[Google Auth] User found with email, linking Google account');
                 // Link Google account to existing user
                 user.googleId = googleId;
-                if (!user.profileImage && picture) {
+                // Update Google profile picture if user hasn't manually uploaded one
+                if (!user.profileImagePublicId && picture) {
+                    console.log('[Google Auth] Setting profile image from Google');
                     user.profileImage = picture;
                 }
                 await user.save();
             } else {
                 // Create new user - role will be set later
+                console.log('[Google Auth] Creating new user with Google profile');
                 user = new User({
                     googleId,
                     name,
@@ -165,8 +184,11 @@ router.post('/google', async (req, res) => {
                     profileImage: picture || '',
                 });
                 await user.save();
+                console.log('[Google Auth] New user created. Profile image set:', !!user.profileImage);
             }
         }
+
+        console.log('[Google Auth] Final user profileImage:', user.profileImage ? 'Present' : 'Empty');
 
         // Generate token
         const token = generateToken(user._id);
@@ -430,7 +452,7 @@ router.delete('/delete-profile-picture', auth, async (req, res) => {
             return res.status(400).json({ message: 'No profile picture to delete' });
         }
 
-        // Delete from Cloudinary
+        // Only delete from Cloudinary if it's a manually uploaded picture
         if (user.profileImagePublicId) {
             try {
                 await deleteFromCloudinary(user.profileImagePublicId, 'image');
@@ -440,12 +462,17 @@ router.delete('/delete-profile-picture', auth, async (req, res) => {
             }
         }
 
-        // Remove from database
+        // Clear manual upload info
         user.profileImage = '';
         user.profileImagePublicId = '';
         await user.save();
 
-        res.json({ message: 'Profile picture deleted successfully' });
+        // Message depends on whether user has Google account
+        const message = user.googleId 
+            ? 'Profile picture deleted. Your Google profile picture will be restored on next login.'
+            : 'Profile picture deleted successfully';
+
+        res.json({ message, profileImage: user.profileImage });
     } catch (error) {
         console.error('Profile picture deletion error:', error);
         res.status(500).json({ message: 'Server error while deleting profile picture' });

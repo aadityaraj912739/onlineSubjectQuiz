@@ -360,8 +360,17 @@ const AppContent = () => {
 
 // Main App Component
 function App() {
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  
+  // Debug log for verification (remove in production)
+  console.log('Google Client ID loaded:', googleClientId ? 'Yes' : 'No');
+  
+  if (!googleClientId) {
+    console.error('REACT_APP_GOOGLE_CLIENT_ID is not defined in environment variables');
+  }
+  
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
+    <GoogleOAuthProvider clientId={googleClientId || '156147048272-533837o45fjt5hcvskh3bh33nkc0hk72.apps.googleusercontent.com'}>
       <ThemeProvider>
         <Router>
           <AuthProvider>

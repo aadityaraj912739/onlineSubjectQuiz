@@ -29,6 +29,17 @@ const CreateExam = () => {
   ]);
   const [errors, setErrors] = useState({});
 
+  // Get minimum datetime for validation (current datetime)
+  const getMinDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleExamDataChange = (e) => {
     const { name, value } = e.target;
     setExamData(prev => ({
@@ -144,8 +155,14 @@ const CreateExam = () => {
 
     setLoading(true);
     try {
+      // Convert datetime-local values to ISO strings with proper timezone
+      const startDateTime = new Date(examData.startTime);
+      const endDateTime = new Date(examData.endTime);
+      
       await axios.post('/exams', {
         ...examData,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
         questions
       });
 
@@ -243,6 +260,7 @@ const CreateExam = () => {
                   name="startTime"
                   value={examData.startTime}
                   onChange={handleExamDataChange}
+                  min={getMinDateTime()}
                   className={`input-field ${errors.startTime ? 'border-red-500' : ''}`}
                 />
                 {errors.startTime && <p className="mt-1 text-sm text-red-600">{errors.startTime}</p>}
@@ -257,6 +275,7 @@ const CreateExam = () => {
                   name="endTime"
                   value={examData.endTime}
                   onChange={handleExamDataChange}
+                  min={examData.startTime || getMinDateTime()}
                   className={`input-field ${errors.endTime ? 'border-red-500' : ''}`}
                 />
                 {errors.endTime && <p className="mt-1 text-sm text-red-600">{errors.endTime}</p>}
