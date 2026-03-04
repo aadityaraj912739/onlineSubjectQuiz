@@ -19,6 +19,7 @@ const ForumThread = () => {
 
     useEffect(() => {
         fetchForum();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchForum = async () => {
@@ -171,8 +172,6 @@ const ForumThread = () => {
     // Render a single reply (recursive for nested replies)
     const renderReply = (reply, index, depth = 0) => {
         const isNested = depth > 0;
-        const maxDepth = 5; // Limit nesting depth for UX
-        const nestingDepth = Math.min(depth, maxDepth);
         
         return (
             <div

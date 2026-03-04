@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -14,7 +14,6 @@ const ForumList = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [sortBy, setSortBy] = useState('recent');
     const { token } = useAuth();
-    const navigate = useNavigate();
 
     const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
 
@@ -28,6 +27,7 @@ const ForumList = () => {
     useEffect(() => {
         fetchForums();
         fetchSubjects();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSubject, searchQuery]);
 
     const fetchForums = async () => {
