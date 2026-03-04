@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 
 // Components
 import Navbar from './components/Navbar.jsx';
@@ -22,6 +23,8 @@ import Profile from './pages/Profile.jsx';
 import DetailedResult from './pages/DetailedResult.jsx';
 import StudyMaterials from './pages/StudyMaterials.jsx';
 import PreviousPapers from './pages/PreviousPapers.jsx';
+import ForumList from './pages/ForumList.jsx';
+import ForumThread from './pages/ForumThread.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -242,6 +245,24 @@ const AppContent = () => {
           } 
         />
 
+        <Route 
+          path="/forums" 
+          element={
+            <ProtectedRoute>
+              <ForumList />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/forums/:id" 
+          element={
+            <ProtectedRoute>
+              <ForumThread />
+            </ProtectedRoute>
+          } 
+        />
+
         {/* Default Routes */}
         <Route 
           path="/" 
@@ -374,7 +395,9 @@ function App() {
       <ThemeProvider>
         <Router>
           <AuthProvider>
-            <AppContent />
+            <NotificationProvider>
+              <AppContent />
+            </NotificationProvider>
           </AuthProvider>
         </Router>
       </ThemeProvider>

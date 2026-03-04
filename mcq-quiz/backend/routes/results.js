@@ -2,6 +2,7 @@ const express = require('express');
 const Result = require('../models/Result');
 const Exam = require('../models/Exam');
 const { auth, isTeacher, isStudent } = require('../middleware/auth');
+const notificationService = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -108,6 +109,18 @@ router.post('/submit', auth, isStudent, async (req, res) => {
         const finalResult = await Result.findById(result._id)
             .populate('exam', 'title subject totalMarks')
             .populate('student', 'name rollNumber');
+
+        // Send notification to teacher about exam submission
+        try {
+            await notificationService.createSubmissionNotification(
+                exam.teacher,
+                exam._id,
+                exam.title,
+                req.user.name
+            );
+        } catch (notifError) {
+            console.error('Error sending submission notification:', notifError);
+        }
 
         res.status(201).json({
             message: 'Exam submitted successfully',

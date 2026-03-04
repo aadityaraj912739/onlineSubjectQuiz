@@ -1,7 +1,9 @@
 const express = require('express');
 const Exam = require('../models/Exam');
 const Result = require('../models/Result');
+const User = require('../models/User');
 const { auth, isTeacher, isStudent } = require('../middleware/auth');
+const notificationService = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -81,6 +83,22 @@ router.post('/', auth, isTeacher, async (req, res) => {
         });
 
         await exam.save();
+
+        // Send notifications to all students
+        try {
+            const students = await User.find({ role: 'student' });
+            for (const student of students) {
+                await notificationService.createExamNotification(
+                    student._id,
+                    exam._id,
+                    exam.title,
+                    req.user.name
+                );
+            }
+        } catch (notifError) {
+            console.error('Error sending exam notifications:', notifError);
+            // Don't fail the request if notifications fail
+        }
 
         res.status(201).json({
             message: 'Exam created successfully',

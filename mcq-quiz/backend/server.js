@@ -68,6 +68,10 @@ app.use('/api/exams', require('./routes/exams'));
 app.use('/api/results', require('./routes/results'));
 app.use('/api/study-materials', require('./routes/studyMaterials'));
 app.use('/api/previous-papers', require('./routes/previousPapers'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/forums', require('./routes/forums'));
+app.use('/api/study-groups', require('./routes/studyGroups'));
+app.use('/api/doubts', require('./routes/doubts'));
 
 // Basic route
 app.get('/', (req, res) => {
