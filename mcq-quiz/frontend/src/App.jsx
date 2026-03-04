@@ -25,6 +25,7 @@ import StudyMaterials from './pages/StudyMaterials.jsx';
 import PreviousPapers from './pages/PreviousPapers.jsx';
 import ForumList from './pages/ForumList.jsx';
 import ForumThread from './pages/ForumThread.jsx';
+import UserProfile from './pages/UserProfile.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -259,6 +260,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <ForumThread />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/user/:userId" 
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           } 
         />

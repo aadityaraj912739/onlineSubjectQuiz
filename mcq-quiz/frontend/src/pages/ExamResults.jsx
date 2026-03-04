@@ -134,36 +134,36 @@ const ExamResults = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
-      <div className="max-w-7xl mx-auto py-6 md:py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 md:mb-8">
-          <Link to={user?.role === 'teacher' ? "/teacher" : "/student"} className="text-xs md:text-sm text-primary-600 dark:text-primary-400 hover:underline mb-4 inline-block">
+      <div className="max-w-7xl mx-auto py-3 sm:py-4 md:py-6 lg:py-8 px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <Link to={user?.role === 'teacher' ? "/teacher" : "/student"} className="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:underline mb-3 sm:mb-4 inline-block touch-manipulation">
             &larr; Back to Dashboard
           </Link>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 Results for: {exam?.title}
               </h1>
-              <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
                 {exam?.subject}
               </p>
             </div>
             {results.length > 0 && (
-              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+              <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
                 <button
                   onClick={downloadExcel}
-                  className="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-md text-sm md:text-base">
+                  className="inline-flex items-center justify-center px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg transition-colors shadow-md text-xs sm:text-sm md:text-base touch-manipulation"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Excel
                 </button>
                 <button
                   onClick={downloadPDF}
-                  className="inline-flex items-center justify-center px-3 md:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-md text-sm md:text-base"
+                  className="inline-flex items-center justify-center px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg transition-colors shadow-md text-xs sm:text-sm md:text-base touch-manipulation"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                   PDF

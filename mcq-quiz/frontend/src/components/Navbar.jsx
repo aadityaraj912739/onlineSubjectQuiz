@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
@@ -9,21 +9,7 @@ const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const profileRef = useRef(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -83,149 +69,72 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Right side controls */}
-          <div className="flex items-center space-x-3">
-            {/* Dark mode toggle */}
+          {/* Right side controls - Twitter Style Professional */}
+          <div className="flex items-center gap-1">
+            {/* Dark mode toggle - Beautiful Twitter Style */}
             <button
               onClick={toggleDarkMode}
-              className="p-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-primary-50 hover:to-blue-50 dark:hover:from-dark-800 dark:hover:to-dark-750 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm hover:shadow-md"
+              className="group relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 ease-in-out"
               aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {darkMode ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
+                <svg className="w-5 h-5 transform group-hover:rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
+                <svg className="w-5 h-5 transform group-hover:-rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
             </button>
 
-            {/* Notification Bell */}
+            {/* Notification Bell - Professional Twitter Style */}
             <NotificationBell />
 
-            {/* Profile dropdown - Desktop */}
-            <div className="hidden md:block relative" ref={profileRef}>
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-2 text-sm bg-white dark:bg-dark-850 rounded-lg p-2 border border-gray-200 dark:border-dark-600 hover:bg-gradient-to-br hover:from-gray-50 hover:to-primary-50 dark:hover:from-dark-800 dark:hover:to-dark-750 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm hover:shadow-md"
-                aria-expanded={isProfileOpen}
-                aria-haspopup="true"
-              >
-                {user?.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-lg object-cover shadow-md"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-white font-semibold text-sm">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <span className="text-gray-900 dark:text-white font-medium hidden lg:block">
-                  {user?.name}
-                </span>
-                <svg
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                    isProfileOpen ? 'rotate-180' : ''
-                  }`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              {/* Dropdown menu */}
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-800 rounded-lg shadow-xl border border-gray-200 dark:border-dark-600 py-1 z-50 animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-600">
-                    <div className="flex items-center space-x-3 mb-2">
-                      {user?.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-500"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                          <span className="text-white font-semibold text-lg">
-                            {user?.name?.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user?.name}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300">
-                          {user?.role === 'teacher' ? 'Teacher' : 'Student'}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
-                  </div>
-                  
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
-                    onClick={() => setIsProfileOpen(false)}
-                  >
-                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    Profile Settings
-                  </Link>
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sign Out
-                  </button>
+            {/* Profile Button - Desktop - Elegant Design */}
+            <button
+              onClick={() => navigate('/profile')}
+              className="hidden md:flex items-center gap-2.5 pl-2.5 pr-3 py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800/80 transition-all duration-200 ease-in-out group"
+              aria-label="Go to profile"
+            >
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary-400/50 transition-all duration-200"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-200">
+                  <span className="text-white font-semibold text-sm">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
                 </div>
               )}
-            </div>
+              <span className="text-sm font-bold text-gray-900 dark:text-white hidden lg:block group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                {user?.name}
+              </span>
+            </button>
 
-            {/* Mobile menu button */}
+            {/* Logout Button - Desktop - Premium Design */}
+            <button
+              onClick={handleLogout}
+              className="hidden md:flex items-center justify-center p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 ease-in-out group"
+              aria-label="Logout"
+              title="Sign out"
+            >
+              <svg className="w-5 h-5 transform group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+
+            {/* Mobile menu button - Professional Design */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="md:hidden p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500/50 group"
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle mobile menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 transform transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
@@ -260,12 +169,13 @@ const Navbar = () => {
               </Link>
             ))}
             
+            {/* Mobile Profile & Logout - Professional Design */}
             <div className="border-t border-gray-200 dark:border-dark-700 pt-2 mt-2">
               <Link
                 to="/profile"
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors"
+                className="group flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 transform group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span>Profile</span>
@@ -273,9 +183,9 @@ const Navbar = () => {
               
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full text-left px-3 py-3 rounded-lg text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="group flex items-center space-x-3 w-full text-left px-3 py-3 rounded-lg text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 transform group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 <span>Sign Out</span>

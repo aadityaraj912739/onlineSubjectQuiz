@@ -323,15 +323,15 @@ const PreviousPapers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-950 py-6 md:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-950 py-4 sm:py-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               Previous Year Question Papers
             </h1>
-            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
               {user?.role === 'teacher' ? 'Upload and manage' : 'Search and download'} previous papers
             </p>
           </div>
@@ -339,7 +339,7 @@ const PreviousPapers = () => {
           {user?.role === 'teacher' && (
             <button
               onClick={() => setShowUploadForm(!showUploadForm)}
-              className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md text-sm md:text-base"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base bg-primary-500 text-white rounded-full hover:bg-primary-600 active:bg-primary-700 transition-all font-semibold touch-manipulation"
             >
               <FaUpload />
               {showUploadForm ? 'Cancel' : 'Upload Paper'}
@@ -349,19 +349,19 @@ const PreviousPapers = () => {
 
         {/* Profile completion warning for students */}
         {user?.role === 'student' && (!user?.country || !user?.state || !user?.college || !user?.branch || !user?.semester) && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-yellow-600 dark:text-yellow-400 text-xl">⚠️</span>
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <span className="text-yellow-600 dark:text-yellow-400 text-lg sm:text-xl flex-shrink-0">⚠️</span>
               <div>
-                <p className="text-sm md:text-base text-yellow-800 dark:text-yellow-300 font-medium">
+                <p className="text-xs sm:text-sm md:text-base text-yellow-800 dark:text-yellow-300 font-medium">
                   Complete your profile for better results!
                 </p>
-                <p className="text-xs md:text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm text-yellow-700 dark:text-yellow-400 mt-1">
                   Add your Country, State, College, Branch, and Semester in your profile to see relevant papers automatically.
                 </p>
                 <Link 
                   to="/profile" 
-                  className="inline-block mt-2 text-xs md:text-sm text-yellow-900 dark:text-yellow-200 underline hover:no-underline font-medium"
+                  className="inline-block mt-1.5 sm:mt-2 text-[10px] sm:text-xs md:text-sm text-yellow-900 dark:text-yellow-200 underline hover:no-underline font-medium touch-manipulation"
                 >
                   Update Profile →
                 </Link>
@@ -372,18 +372,18 @@ const PreviousPapers = () => {
 
         {/* Upload Form (Teacher Only) */}
         {showUploadForm && user?.role === 'teacher' && (
-          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-dark-800 rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
               Upload Previous Paper
             </h2>
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleUpload} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <input
                   type="text"
                   placeholder="Paper Title *"
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -391,7 +391,7 @@ const PreviousPapers = () => {
                   placeholder="Subject *"
                   value={formData.subject}
                   onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -399,7 +399,7 @@ const PreviousPapers = () => {
                   placeholder="Year *"
                   value={formData.year}
                   onChange={(e) => setFormData({...formData, year: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -407,7 +407,7 @@ const PreviousPapers = () => {
                   placeholder="Country *"
                   value={formData.country}
                   onChange={(e) => setFormData({...formData, country: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -415,7 +415,7 @@ const PreviousPapers = () => {
                   placeholder="State/Province *"
                   value={formData.state}
                   onChange={(e) => setFormData({...formData, state: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -423,7 +423,7 @@ const PreviousPapers = () => {
                   placeholder="College/University *"
                   value={formData.college}
                   onChange={(e) => setFormData({...formData, college: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -431,7 +431,7 @@ const PreviousPapers = () => {
                   placeholder="Branch (e.g., CSE, ECE) *"
                   value={formData.branch}
                   onChange={(e) => setFormData({...formData, branch: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
                 <input
@@ -439,12 +439,12 @@ const PreviousPapers = () => {
                   placeholder="Semester (e.g., 1, 2, 3) *"
                   value={formData.semester}
                   onChange={(e) => setFormData({...formData, semester: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                   required
                 />
               </div>
 
-              <div className="border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-lg p-4 md:p-6 text-center">
+              <div className="border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-lg p-3 sm:p-4 md:p-6 text-center">
                 <input
                   type="file"
                   accept=".pdf"
@@ -454,10 +454,10 @@ const PreviousPapers = () => {
                 />
                 <label 
                   htmlFor="file-upload" 
-                  className="cursor-pointer flex flex-col items-center"
+                  className="cursor-pointer flex flex-col items-center touch-manipulation"
                 >
-                  <FaUpload className="text-3xl md:text-4xl text-gray-400 mb-2" />
-                  <span className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+                  <FaUpload className="text-2xl sm:text-3xl md:text-4xl text-gray-400 mb-1.5 sm:mb-2" />
+                  <span className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
                     {selectedFile ? selectedFile.name : 'Click to select PDF file (Max 10MB)'}
                   </span>
                 </label>
@@ -466,7 +466,7 @@ const PreviousPapers = () => {
               <button
                 type="submit"
                 disabled={uploading || !selectedFile}
-                className="w-full py-2 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium"
+                className="w-full py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm md:text-base font-medium touch-manipulation"
               >
                 {uploading ? 'Uploading...' : 'Upload Paper'}
               </button>
@@ -475,15 +475,15 @@ const PreviousPapers = () => {
         )}
 
         {/* Filters Section */}
-        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <FaFilter />
+        <div className="bg-white dark:bg-dark-800 rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <FaFilter className="text-sm sm:text-base" />
               Search & Filter Papers
             </h2>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="text-sm md:text-base text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-xs sm:text-sm md:text-base text-blue-600 dark:text-blue-400 hover:underline touch-manipulation self-start sm:self-auto"
             >
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
@@ -491,33 +491,33 @@ const PreviousPapers = () => {
 
           {/* Auto-filter indicator for students */}
           {user?.role === 'student' && (user?.country || user?.state || user?.college || user?.branch || user?.semester) && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-300">
+            <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-[10px] sm:text-xs md:text-sm text-blue-800 dark:text-blue-300">
                 <span className="font-semibold">✓ Auto-filtered:</span> Papers matching your profile ({user?.country}{user?.state ? `, ${user.state}` : ''}{user?.college ? `, ${user.college}` : ''}{user?.branch ? `, ${user.branch}` : ''}{user?.semester ? `, Semester ${user.semester}` : ''})
               </p>
             </div>
           )}
 
           {/* Search Bar */}
-          <div className="relative mb-4">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="relative mb-3 sm:mb-4">
+            <FaSearch className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm" />
             <input
               type="text"
               placeholder="Search by title or subject..."
               value={filters.search}
               onChange={(e) => setFilters({...filters, search: e.target.value})}
-              className="w-full pl-12 pr-4 py-2 md:py-3 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+              className="w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 md:py-3 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
             />
           </div>
 
           {/* Filter Dropdowns */}
           {showFilters && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="space-y-3 sm:space-y-4 animate-fadeIn">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 <select
                   value={filters.country}
                   onChange={(e) => setFilters({...filters, country: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Countries</option>
                   {filterOptions.countries.map(c => (
@@ -528,7 +528,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.state}
                   onChange={(e) => setFilters({...filters, state: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All States</option>
                   {filterOptions.states.map(s => (
@@ -539,7 +539,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.college}
                   onChange={(e) => setFilters({...filters, college: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Colleges</option>
                   {filterOptions.colleges.map(c => (
@@ -550,7 +550,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.branch}
                   onChange={(e) => setFilters({...filters, branch: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Branches</option>
                   {filterOptions.branches.map(b => (
@@ -561,7 +561,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.semester}
                   onChange={(e) => setFilters({...filters, semester: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Semesters</option>
                   {filterOptions.semesters.map(s => (
@@ -572,7 +572,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.subject}
                   onChange={(e) => setFilters({...filters, subject: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Subjects</option>
                   {filterOptions.subjects.map(s => (
@@ -583,7 +583,7 @@ const PreviousPapers = () => {
                 <select
                   value={filters.year}
                   onChange={(e) => setFilters({...filters, year: e.target.value})}
-                  className="px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-sm md:text-base"
+                  className="px-2 sm:px-3 md:px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-dark-700 dark:text-white text-xs sm:text-sm md:text-base"
                 >
                   <option value="">All Years</option>
                   {filterOptions.years.map(y => (
@@ -593,9 +593,9 @@ const PreviousPapers = () => {
 
                 <button
                   onClick={clearFilters}
-                  className="px-4 py-2 bg-gray-200 dark:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                  className="px-3 sm:px-4 py-2 bg-gray-200 dark:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-dark-500 active:bg-gray-400 dark:active:bg-dark-400 transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-manipulation"
                 >
-                  <FaTimes />
+                  <FaTimes className="text-xs sm:text-sm" />
                   Clear Filters
                 </button>
               </div>
@@ -604,55 +604,55 @@ const PreviousPapers = () => {
         </div>
 
         {/* Papers Grid */}
-        <div className="mb-4">
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+        <div className="mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">
             Found {papers.length} paper{papers.length !== 1 ? 's' : ''}
           </p>
         </div>
 
         {papers.length === 0 ? (
-          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-8 md:p-12 text-center">
-            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
+          <div className="bg-white dark:bg-dark-800 rounded-xl sm:rounded-2xl shadow-md p-6 sm:p-8 md:p-12 text-center">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400">
               No papers found matching your filters.
             </p>
             <button
               onClick={clearFilters}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+              className="mt-3 sm:mt-4 px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors text-xs sm:text-sm md:text-base touch-manipulation"
             >
               Clear Filters
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {papers.map(paper => (
               <div
                 key={paper._id}
-                className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition-shadow"
+                className="bg-white dark:bg-dark-800 rounded-xl sm:rounded-2xl shadow-md p-3 sm:p-4 md:p-6 hover:shadow-lg transition-shadow"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white pr-2">
+                <div className="flex justify-between items-start mb-2 sm:mb-3">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white pr-2">
                     {paper.title}
                   </h3>
                   {user?.role === 'teacher' && paper.teacher._id === user.id && (
                     <button
                       onClick={() => handleDelete(paper._id)}
-                      className="text-red-600 hover:text-red-700 p-1"
+                      className="text-red-600 hover:text-red-700 active:text-red-800 p-1 touch-manipulation"
                       title="Delete"
                     >
-                      <FaTrash className="text-sm md:text-base" />
+                      <FaTrash className="text-xs sm:text-sm md:text-base" />
                     </button>
                   )}
                 </div>
 
-                <div className="space-y-2 mb-4 text-xs md:text-sm">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-[10px] sm:text-xs md:text-sm">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] sm:text-xs">
                       {paper.subject}
                     </span>
-                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-[10px] sm:text-xs">
                       Year: {paper.year}
                     </span>
-                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] sm:text-xs">
                       Sem: {paper.semester}
                     </span>
                   </div>
@@ -669,16 +669,16 @@ const PreviousPapers = () => {
                   <p className="text-gray-600 dark:text-gray-400">
                     <strong>Uploaded by:</strong> {paper.teacher.name}
                   </p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                  <p className="text-gray-500 dark:text-gray-500">
                     Downloads: {paper.downloadCount}
                   </p>
                 </div>
 
                 <button
                   onClick={() => handleDownload(paper)}
-                  className="w-full py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all flex items-center justify-center gap-2 text-sm md:text-base"
+                  className="w-full py-2 sm:py-2.5 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 active:from-green-800 active:to-teal-800 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-manipulation"
                 >
-                  <FaDownload />
+                  <FaDownload className="text-xs sm:text-sm" />
                   Download PDF
                 </button>
               </div>

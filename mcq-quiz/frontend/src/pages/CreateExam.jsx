@@ -178,21 +178,21 @@ const CreateExam = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6">
         {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Create New Exam</h1>
-          <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Create New Exam</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Set up your MCQ exam with questions and options
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Exam Details */}
-          <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Exam Details</h2>
+          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Exam Details</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Exam Title *
@@ -202,10 +202,10 @@ const CreateExam = () => {
                   name="title"
                   value={examData.title}
                   onChange={handleExamDataChange}
-                  className={`input-field ${errors.title ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-white dark:bg-dark-900 border rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.title ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                   placeholder="e.g., Mathematics Mid-term Exam"
                 />
-                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                {errors.title && <p className="mt-1.5 text-sm text-red-600">{errors.title}</p>}
               </div>
 
               <div>
@@ -217,13 +217,13 @@ const CreateExam = () => {
                   name="subject"
                   value={examData.subject}
                   onChange={handleExamDataChange}
-                  className={`input-field ${errors.subject ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-white dark:bg-dark-900 border rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.subject ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                   placeholder="e.g., Mathematics"
                 />
-                {errors.subject && <p className="mt-1 text-sm text-red-600">{errors.subject}</p>}
+                {errors.subject && <p className="mt-1.5 text-sm text-red-600">{errors.subject}</p>}
               </div>
 
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Description
                 </label>
@@ -231,8 +231,8 @@ const CreateExam = () => {
                   name="description"
                   value={examData.description}
                   onChange={handleExamDataChange}
-                  rows={3}
-                  className="input-field"
+                  rows={2}
+                  className="w-full px-4 py-2.5 bg-white dark:bg-dark-900 border border-gray-300 dark:border-dark-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   placeholder="Brief description of the exam (optional)"
                 />
               </div>
@@ -247,7 +247,7 @@ const CreateExam = () => {
                   value={examData.duration}
                   onChange={handleExamDataChange}
                   min="1"
-                  className="input-field"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-dark-900 border border-gray-300 dark:border-dark-600 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -261,9 +261,9 @@ const CreateExam = () => {
                   value={examData.startTime}
                   onChange={handleExamDataChange}
                   min={getMinDateTime()}
-                  className={`input-field ${errors.startTime ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-white dark:bg-dark-900 border rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.startTime ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                 />
-                {errors.startTime && <p className="mt-1 text-sm text-red-600">{errors.startTime}</p>}
+                {errors.startTime && <p className="mt-1.5 text-sm text-red-600">{errors.startTime}</p>}
               </div>
 
               <div>
@@ -276,7 +276,7 @@ const CreateExam = () => {
                   value={examData.endTime}
                   onChange={handleExamDataChange}
                   min={examData.startTime || getMinDateTime()}
-                  className={`input-field ${errors.endTime ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-white dark:bg-dark-900 border rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.endTime ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                 />
                 {errors.endTime && <p className="mt-1 text-sm text-red-600">{errors.endTime}</p>}
               </div>
@@ -284,31 +284,32 @@ const CreateExam = () => {
           </div>
 
           {/* Questions Section */}
-          <div className="card">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Questions <span className="text-lg font-normal text-gray-500 dark:text-gray-400">({questions.length})</span>
+          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Questions ({questions.length})
               </h2>
               <button
                 type="button"
                 onClick={addQuestion}
-                className="btn-secondary"
+                className="px-4 py-2 text-sm font-semibold bg-primary-500 text-white rounded-full hover:bg-primary-600 active:bg-primary-700 transition-colors"
               >
                 Add Question
               </button>
             </div>
 
-            {questions.map((question, questionIndex) => (
-              <div key={questionIndex} className="question-card border border-gray-200 dark:border-dark-600 rounded-lg p-6 mb-4">
+            <div className="space-y-4">
+              {questions.map((question, questionIndex) => (
+                <div key={questionIndex} className="bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     Question {questionIndex + 1}
                   </h3>
                   {questions.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeQuestion(questionIndex)}
-                      className="text-red-600 hover:text-red-700 dark:text-red-400"
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 transition-colors"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -325,39 +326,36 @@ const CreateExam = () => {
                     <textarea
                       value={question.question}
                       onChange={(e) => handleQuestionChange(questionIndex, 'question', e.target.value)}
-                      rows={3}
-                      className={`input-field ${errors[`question_${questionIndex}`] ? 'border-red-500' : ''}`}
+                      rows={2}
+                      className={`w-full px-4 py-2.5 bg-white dark:bg-dark-800 border rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors[`question_${questionIndex}`] ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                       placeholder="Enter your question here..."
                     />
                     {errors[`question_${questionIndex}`] && (
-                      <p className="mt-1 text-sm text-red-600">{errors[`question_${questionIndex}`]}</p>
+                      <p className="mt-1.5 text-sm text-red-600">{errors[`question_${questionIndex}`]}</p>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     {question.options.map((option, optionIndex) => (
-                      <div key={optionIndex} className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Option {optionIndex + 1} *
-                        </label>
-                        <div className="flex items-center space-x-3">
+                      <div key={optionIndex}>
+                        <div className="flex items-center gap-3">
                           <input
                             type="radio"
                             name={`correct_${questionIndex}`}
                             checked={option.isCorrect}
                             onChange={() => handleCorrectOptionChange(questionIndex, optionIndex)}
-                            className="w-4 h-4 text-primary-600 focus:ring-primary-500"
+                            className="w-4 h-4 text-primary-600 focus:ring-2 focus:ring-primary-500 cursor-pointer"
                           />
                           <input
                             type="text"
                             value={option.text}
                             onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
-                            className={`flex-1 input-field ${errors[`option_${questionIndex}_${optionIndex}`] ? 'border-red-500' : ''}`}
+                            className={`flex-1 px-4 py-2.5 bg-white dark:bg-dark-800 border rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors[`option_${questionIndex}_${optionIndex}`] ? 'border-red-500' : 'border-gray-300 dark:border-dark-600'}`}
                             placeholder={`Option ${optionIndex + 1}`}
                           />
                         </div>
                         {errors[`option_${questionIndex}_${optionIndex}`] && (
-                          <p className="text-sm text-red-600">{errors[`option_${questionIndex}_${optionIndex}`]}</p>
+                          <p className="mt-1.5 ml-7 text-sm text-red-600">{errors[`option_${questionIndex}_${optionIndex}`]}</p>
                         )}
                       </div>
                     ))}
@@ -367,9 +365,9 @@ const CreateExam = () => {
                     <p className="text-sm text-red-600">{errors[`correct_${questionIndex}`]}</p>
                   )}
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-6 pt-2">
                     <div className="flex items-center gap-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Marks:
                       </label>
                       <input
@@ -378,11 +376,11 @@ const CreateExam = () => {
                         onChange={(e) => handleQuestionChange(questionIndex, 'marks', parseInt(e.target.value) || 1)}
                         min="1"
                         max="10"
-                        className="input-field w-20"
+                        className="w-16 px-3 py-1.5 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Time (seconds):
                       </label>
                       <input
@@ -391,28 +389,29 @@ const CreateExam = () => {
                         onChange={(e) => handleQuestionChange(questionIndex, 'timePerQuestion', parseInt(e.target.value) || 60)}
                         min="10"
                         max="600"
-                        className="input-field w-24"
+                        className="w-20 px-3 py-1.5 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                       />
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+            </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => navigate('/teacher')}
-              className="btn-secondary w-full sm:w-auto order-2 sm:order-1"
+              className="px-6 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full sm:w-auto order-1 sm:order-2"
+              className="px-6 py-2.5 text-sm font-semibold bg-primary-500 text-white rounded-full hover:bg-primary-600 active:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Exam...' : 'Create Exam'}
             </button>

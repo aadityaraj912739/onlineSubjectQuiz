@@ -479,4 +479,57 @@ router.delete('/delete-profile-picture', auth, async (req, res) => {
     }
 });
 
+// @route   GET /api/auth/user/:userId
+// @desc    Get user profile with their forum posts
+// @access  Public
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Get user info
+        const user = await User.findById(userId).select('-password -googleId');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Get Forum model
+        const Forum = require('../models/Forum');
+        
+        // Get user's forum posts
+        const forums = await Forum.find({ author: userId })
+            .populate('author', 'name email role profileImage')
+            .populate('replies.user', 'name email role profileImage')
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profileImage: user.profileImage,
+                linkedin: user.linkedin,
+                leetcode: user.leetcode,
+                github: user.github,
+                department: user.department,
+                rollNumber: user.rollNumber,
+                class: user.class,
+                semester: user.semester,
+                createdAt: user.createdAt
+            },
+            forums,
+            stats: {
+                totalPosts: forums.length,
+                totalLikes: forums.reduce((sum, forum) => sum + forum.likes.length, 0),
+                totalReplies: forums.reduce((sum, forum) => sum + forum.replies.length, 0)
+            }
+        });
+    } catch (error) {
+        console.error('Get user profile error:', error);
+        res.status(500).json({ message: 'Server error while fetching user profile' });
+    }
+});
+
 module.exports = router;

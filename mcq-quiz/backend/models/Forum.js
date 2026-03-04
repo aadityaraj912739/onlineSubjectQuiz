@@ -33,7 +33,7 @@ const replySchema = new mongoose.Schema({
 const forumSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     content: {
@@ -42,7 +42,7 @@ const forumSchema = new mongoose.Schema({
     },
     subject: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     tags: [{

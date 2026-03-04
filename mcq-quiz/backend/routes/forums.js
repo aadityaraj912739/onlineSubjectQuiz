@@ -80,14 +80,14 @@ router.post('/', auth, async (req, res) => {
     try {
         const { title, content, subject, tags } = req.body;
 
-        if (!title || !content || !subject) {
-            return res.status(400).json({ message: 'Please provide title, content, and subject' });
+        if (!content) {
+            return res.status(400).json({ message: 'Please provide content' });
         }
 
         const forum = await Forum.create({
-            title,
+            title: title || '',
             content,
-            subject,
+            subject: subject || '',
             tags: tags || [],
             author: req.user.id
         });
