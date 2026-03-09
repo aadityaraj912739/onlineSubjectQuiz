@@ -72,6 +72,8 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/forums', require('./routes/forums'));
 app.use('/api/study-groups', require('./routes/studyGroups'));
 app.use('/api/doubts', require('./routes/doubts'));
+app.use('/api/helpdesk', require('./routes/helpdesk'));
+app.use('/api/contact', require('./routes/contact'));
 
 // Basic route
 app.get('/', (req, res) => {

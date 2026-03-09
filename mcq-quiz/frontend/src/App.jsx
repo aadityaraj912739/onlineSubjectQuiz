@@ -26,6 +26,7 @@ import PreviousPapers from './pages/PreviousPapers.jsx';
 import ForumList from './pages/ForumList.jsx';
 import ForumThread from './pages/ForumThread.jsx';
 import UserProfile from './pages/UserProfile.jsx';
+import Contact from './pages/Contact.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -269,6 +270,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/contact" 
+          element={
+            <ProtectedRoute>
+              <Contact />
             </ProtectedRoute>
           } 
         />

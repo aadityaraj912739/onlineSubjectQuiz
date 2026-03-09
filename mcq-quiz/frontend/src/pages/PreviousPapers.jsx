@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
 import toast from 'react-hot-toast';
 import { FaSearch, FaFilter, FaDownload, FaTrash, FaTimes, FaUpload } from 'react-icons/fa';
+import { BACKEND_URL } from '../config/api.js';
 
 const PreviousPapers = () => {
   const { user, api } = useAuth();
@@ -194,7 +195,7 @@ const PreviousPapers = () => {
       
       // Backend now proxies the file and streams it directly
       const token = localStorage.getItem('token');
-      const downloadUrl = `https://onlinesubjectquiz.onrender.com/api/previous-papers/download/${paper._id}`;
+      const downloadUrl = `${BACKEND_URL}/api/previous-papers/download/${paper._id}`;
       
       const response = await fetch(downloadUrl, {
         headers: {

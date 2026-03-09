@@ -24,6 +24,27 @@ const auth = async (req, res, next) => {
     }
 };
 
+// Optional authentication - does not require token
+const optionalAuth = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        
+        if (token) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findById(decoded.userId).select('-password');
+            
+            if (user) {
+                req.user = user;
+            }
+        }
+        
+        next(); // Continue even without token
+    } catch (error) {
+        // Ignore token errors for optional auth
+        next();
+    }
+};
+
 // Check if user is teacher
 const isTeacher = (req, res, next) => {
     if (req.user.role !== 'teacher') {
@@ -40,4 +61,4 @@ const isStudent = (req, res, next) => {
     next();
 };
 
-module.exports = { auth, isTeacher, isStudent };
+module.exports = { auth, optionalAuth, isTeacher, isStudent };

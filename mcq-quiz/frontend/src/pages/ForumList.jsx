@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ const ForumList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const { token, user } = useAuth();
+    const navigate = useNavigate();
 
     const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
 
@@ -150,9 +151,9 @@ const ForumList = () => {
                 ) : (
                     <div className="divide-y divide-gray-200 dark:divide-dark-800">
                         {forums.map((forum) => (
-                            <Link
+                            <div
                                 key={forum._id}
-                                to={`/forums/${forum._id}`}
+                                onClick={() => navigate(`/forums/${forum._id}`)}
                                 className="block hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors duration-200 cursor-pointer"
                             >
                                 <div className="px-4 py-3">
@@ -251,7 +252,7 @@ const ForumList = () => {
                                             </div>
                                         </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))}
                     </div>
                 )}
