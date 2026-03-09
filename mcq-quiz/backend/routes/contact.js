@@ -10,10 +10,12 @@ const ADMIN_EMAIL = 'ar912739@gmail.com';
 // @access  Public (can be used by logged in and guest users)
 router.post('/', optionalAuth, async (req, res) => {
   try {
+    console.log('[Contact] Received contact form submission');
     const { name, email, subject, category, priority, message } = req.body;
 
     // Validate required fields
     if (!name || !email || !subject || !message) {
+      console.log('[Contact] Validation failed - missing required fields');
       return res.status(400).json({ 
         success: false, 
         message: 'Please provide all required fields (name, email, subject, message)' 
@@ -23,6 +25,7 @@ router.post('/', optionalAuth, async (req, res) => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.log('[Contact] Validation failed - invalid email format');
       return res.status(400).json({ 
         success: false, 
         message: 'Please provide a valid email address' 
@@ -30,7 +33,17 @@ router.post('/', optionalAuth, async (req, res) => {
     }
 
     // Import email service
+    console.log('[Contact] Importing email service');
     const emailService = require('../services/emailService');
+    
+    // Check if email service is configured
+    if (!emailService.transporter) {
+      console.error('[Contact] Email service not configured - transporter is null');
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Email service is not configured. Please contact support directly at ar912739@gmail.com'
+      });
+    }
 
     // Priority emoji
     const priorityEmoji = {
@@ -102,6 +115,9 @@ Submitted: ${new Date().toLocaleString()}
     `.trim();
 
     // Send email to admin
+    console.log('[Contact] Attempting to send email to:', ADMIN_EMAIL);
+    console.log('[Contact] Email subject:', `[${priority.toUpperCase()}] ${category}: ${subject}`);
+    
     const result = await emailService.sendEmail({
       to: ADMIN_EMAIL,
       subject: `[${priority.toUpperCase()}] ${category}: ${subject}`,
@@ -109,14 +125,17 @@ Submitted: ${new Date().toLocaleString()}
       text: emailText
     });
 
+    console.log('[Contact] Email send result:', result);
+
     if (result.success) {
+      console.log('[Contact] Email sent successfully');
       res.json({ 
         success: true, 
         message: 'Your message has been sent successfully. We will get back to you soon!'
       });
     } else {
       // Even if email fails, we should inform the user gracefully
-      console.error('Failed to send contact email:', result.error);
+      console.error('[Contact] Failed to send email:', result.error || result.message);
       res.status(500).json({ 
         success: false, 
         message: 'Failed to send your message. Please try again later or email us directly at ar912739@gmail.com'
@@ -124,10 +143,11 @@ Submitted: ${new Date().toLocaleString()}
     }
 
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('[Contact] Unexpected error:', error);
+    console.error('[Contact] Error stack:', error.stack);
     res.status(500).json({ 
       success: false, 
-      message: 'An error occurred while sending your message. Please try again later.'
+      message: 'An error occurred while sending your message. Please try again later or contact us at ar912739@gmail.com'
     });
   }
 });
