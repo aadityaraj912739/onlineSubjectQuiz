@@ -49,6 +49,12 @@ router.post('/', optionalAuth, async (req, res) => {
     await contactSubmission.save();
     console.log('[Contact] Saved to database with ID:', contactSubmission._id);
 
+    // Capture user info before async operation
+    const userInfo = req.user ? {
+      id: req.user.id,
+      role: req.user.role
+    } : null;
+
     // Send response immediately - don't wait for email
     res.json({ 
       success: true, 
@@ -88,8 +94,8 @@ router.post('/', optionalAuth, async (req, res) => {
                 <h3 style="color: #1f2937; margin: 0 0 10px 0;">Contact Information</h3>
                 <p style="margin: 5px 0; color: #4b5563;"><strong>Name:</strong> ${name}</p>
                 <p style="margin: 5px 0; color: #4b5563;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #4F46E5;">${email}</a></p>
-                ${req.user ? `<p style="margin: 5px 0; color: #4b5563;"><strong>User ID:</strong> ${req.user.id}</p>` : ''}
-                ${req.user ? `<p style="margin: 5px 0; color: #4b5563;"><strong>Role:</strong> ${req.user.role}</p>` : ''}
+                ${userInfo ? `<p style="margin: 5px 0; color: #4b5563;"><strong>User ID:</strong> ${userInfo.id}</p>` : ''}
+                ${userInfo ? `<p style="margin: 5px 0; color: #4b5563;"><strong>Role:</strong> ${userInfo.role}</p>` : ''}
               </div>
               
               <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f3f4f6;">
@@ -125,8 +131,8 @@ Priority: ${priority.toUpperCase()}
 Contact Information:
 - Name: ${name}
 - Email: ${email}
-${req.user ? `- User ID: ${req.user.id}` : ''}
-${req.user ? `- Role: ${req.user.role}` : ''}
+${userInfo ? `- User ID: ${userInfo.id}` : ''}
+${userInfo ? `- Role: ${userInfo.role}` : ''}
 
 Subject: ${subject}
 
