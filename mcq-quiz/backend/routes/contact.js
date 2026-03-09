@@ -49,12 +49,24 @@ router.post('/', optionalAuth, async (req, res) => {
     await contactSubmission.save();
     console.log('[Contact] Saved to database with ID:', contactSubmission._id);
 
-    // Try to send email (optional - won't fail if email service is not configured)
-    try {
-      console.log('[Contact] Attempting to send email notification');
-      const emailService = require('../services/emailService');
-      
-      if (emailService.transporter) {
+    // Send response immediately - don't wait for email
+    res.json({ 
+      success: true, 
+      message: 'Your message has been received successfully. We will get back to you soon!',
+      submissionId: contactSubmission._id
+    });
+
+    // Send email in background (non-blocking)
+    setImmediate(async () => {
+      try {
+        console.log('[Contact] Attempting to send email notification (background)');
+        const emailService = require('../services/emailService');
+        
+        if (!emailService.transporter) {
+          console.log('[Contact] Email service not configured, skipping email notification');
+          return;
+        }
+
         // Priority emoji
         const priorityEmoji = {
           'urgent': '🚨',
@@ -140,20 +152,9 @@ Submitted: ${new Date().toLocaleString()}
         } else {
           console.error('[Contact] Failed to send email:', result.error || result.message);
         }
-      } else {
-        console.log('[Contact] Email service not configured, skipping email notification');
+      } catch (emailError) {
+        console.error('[Contact] Error sending email (non-fatal):', emailError.message);
       }
-    } catch (emailError) {
-      console.error('[Contact] Error sending email (non-fatal):', emailError.message);
-      // Continue execution - email failure is not critical
-    }
-
-    // Always return success if saved to database
-    console.log('[Contact] Returning success response');
-    res.json({ 
-      success: true, 
-      message: 'Your message has been received successfully. We will get back to you soon!',
-      submissionId: contactSubmission._id
     });
 
   } catch (error) {
