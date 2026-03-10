@@ -186,103 +186,13 @@ const PreviousPapers = memo(() => {
 
   const handleDownload = async (paper) => {
     try {
-      toast.loading('Preparing download...');
+      const url = paper.fileUrl.startsWith('http') ? paper.fileUrl : `${BACKEND_URL}${paper.fileUrl}`;
+      window.open(url, '_blank');
       
-      // Backend now proxies the file and streams it directly
-      const token = localStorage.getItem('token');
-      const downloadUrl = `${BACKEND_URL}/api/previous-papers/download/${paper._id}`;
-      
-      const response = await fetch(downloadUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      // Check if response is JSON (error) or file stream (success)
-      const contentType = response.headers.get('content-type');
-      
-      if (!response.ok || contentType?.includes('application/json')) {
-        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
-        toast.dismiss();
-        
-        // Handle specific error cases
-        if (errorData.fileNotAvailable) {
-          if (errorData.requiresReupload) {
-            toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
-              duration: 7000,
-              style: {
-                background: '#FEF3C7',
-                color: '#92400E',
-                fontWeight: '500'
-              }
-            });
-          } else {
-            toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
-              duration: 6000,
-              style: {
-                background: '#FEF3C7',
-                color: '#92400E',
-                fontWeight: '500'
-              }
-            });
-          }
-        } else {
-          toast.error(errorData.message || 'Download failed');
-        }
-        return;
-      }
-
-      toast.dismiss();
-      toast.loading('Downloading file...');
-      
-      // Get the file as blob
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      // Extract filename from Content-Disposition header or use default
-      const disposition = response.headers.get('Content-Disposition');
-      let fileName = 'paper.pdf';
-      if (disposition && disposition.includes('filename=')) {
-        const match = disposition.match(/filename="?([^"]+)"?/);
-        if (match) fileName = match[1];
-      }
-      
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up blob URL
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
-      
-      toast.dismiss();
-      toast.success('Download completed! Check your downloads folder.');
+      // Update download count
+      await api.post(`/previous-papers/${paper._id}/download`);
     } catch (error) {
       console.error('Download error:', error);
-      toast.dismiss();
-      const errorMessage = error.message || 'Download failed';
-      
-      // Check for file not available errors
-      if (errorMessage.includes('not found on server') || 
-          errorMessage.includes('File not found') ||
-          errorMessage.includes('fileNotAvailable')) {
-        toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
-          duration: 6000,
-          style: {
-            background: '#FEF3C7',
-            color: '#92400E',
-            fontWeight: '500'
-          }
-        });
-      } else if (error.message.includes('Previous paper not found')) {
-        toast.error('This paper has been deleted or is no longer available.');
-      } else {
-        toast.error(errorMessage || 'Failed to download file. Please try again.');
-      }
     }
   };
 
@@ -336,7 +246,7 @@ const PreviousPapers = memo(() => {
             {user?.role === 'teacher' && (
               <button
                 onClick={() => setShowUploadForm(!showUploadForm)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors font-semibold text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all"
               >
                 <FaUpload className="text-sm" />
                 <span className="hidden sm:inline">Upload Paper</span>
@@ -372,7 +282,7 @@ const PreviousPapers = memo(() => {
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors font-medium text-sm relative"
+              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 transition-all relative"
             >
               <FaFilter className="text-sm" />
               <span>Filters</span>
@@ -517,7 +427,7 @@ const PreviousPapers = memo(() => {
         {/* Upload Form */}
         {showUploadForm && (
           <div className="mb-6 p-4 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-lg">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Upload New Paper</h3>
+            <h3 className="text-lg font-bold mb-4">Upload New Paper</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
@@ -525,7 +435,7 @@ const PreviousPapers = memo(() => {
                   placeholder="Title *"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                   required
                 />
                 <input
@@ -533,7 +443,7 @@ const PreviousPapers = memo(() => {
                   placeholder="Subject *"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                   required
                 />
                 <input
@@ -541,14 +451,14 @@ const PreviousPapers = memo(() => {
                   placeholder="Year"
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                 />
                 <input
                   type="text"
                   placeholder="Semester"
                   value={formData.semester}
                   onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                 />
               </div>
 
@@ -557,7 +467,7 @@ const PreviousPapers = memo(() => {
                   type="file"
                   accept="application/pdf"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                 />
                 {selectedFile && (
                   <p className="mt-2 text-sm text-gray-600">{selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
@@ -568,14 +478,14 @@ const PreviousPapers = memo(() => {
                 <button
                   type="button"
                   onClick={() => setShowUploadForm(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 font-medium transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={uploading || !selectedFile}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:opacity-50 font-semibold transition-colors"
+                  disabled={uploading}
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
                 >
                   {uploading ? 'Uploading...' : 'Upload Paper'}
                 </button>
@@ -591,7 +501,7 @@ const PreviousPapers = memo(() => {
               {displayedPapers.map((paper) => (
                 <div
                   key={paper._id}
-                  className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors cursor-pointer"
+                  className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-lg p-3 hover:border-primary-500 dark:hover:border-primary-500 transition-all hover:shadow-md"
                 >
                   {/* Header */}
                   <div className="flex items-start gap-2 mb-2">
@@ -634,14 +544,14 @@ const PreviousPapers = memo(() => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDownload(paper)}
-                      className="flex-1 px-3 py-1.5 bg-primary-500 text-white text-xs font-semibold rounded-full hover:bg-primary-600 transition-colors"
+                      className="flex-1 px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 transition-all"
                     >
                       Download
                     </button>
                     {user?.role === 'teacher' && paper.uploadedBy?._id === user?._id && (
                       <button
                         onClick={() => handleDelete(paper._id)}
-                        className="px-2 py-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                        className="px-2 py-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
                       >
                         <FaTrash className="text-xs" />
                       </button>
@@ -657,7 +567,7 @@ const PreviousPapers = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -679,10 +589,10 @@ const PreviousPapers = memo(() => {
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-full font-semibold transition-colors ${
+                        className={`w-10 h-10 rounded-lg font-medium transition-all ${
                           page === pageNum
                             ? 'bg-primary-500 text-white'
-                            : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-dark-800'
+                            : 'border border-gray-300 dark:border-dark-700 hover:bg-gray-100 dark:hover:bg-dark-800'
                         }`}
                       >
                         {pageNum}
@@ -694,7 +604,7 @@ const PreviousPapers = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

@@ -120,6 +120,40 @@ const uploadProfilePicture = multer({
     fileFilter: profilePictureFileFilter
 });
 
+// Storage configuration for Forum Images
+const forumImageStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'forum-images',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        resource_type: 'image',
+        transformation: [{ width: 1200, height: 1200, crop: 'limit' }],
+        public_id: (req, file) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            return `forum-${uniqueSuffix}`;
+        }
+    }
+});
+
+// File filter for Forum Images
+const forumImageFileFilter = (req, file, cb) => {
+    const allowedTypes = /jpg|jpeg|png|gif|webp/;
+    const extname = allowedTypes.test(file.originalname.split('.').pop().toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Only image files (JPG, JPEG, PNG, GIF, WEBP) are allowed!'));
+    }
+};
+
+const uploadForumImage = multer({
+    storage: forumImageStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: forumImageFileFilter
+});
+
 // Helper function to delete a file from Cloudinary
 const deleteFromCloudinary = async (publicId, resourceType = 'raw') => {
     try {
@@ -156,6 +190,7 @@ module.exports = {
     uploadPreviousPaper,
     uploadStudyMaterial,
     uploadProfilePicture,
+    uploadForumImage,
     deleteFromCloudinary,
     extractPublicId
 };

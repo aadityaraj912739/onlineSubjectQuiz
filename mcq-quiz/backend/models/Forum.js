@@ -11,6 +11,10 @@ const replySchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    image: {
+        type: String,
+        default: null
+    },
     parentReply: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reply',
@@ -39,6 +43,10 @@ const forumSchema = new mongoose.Schema({
     content: {
         type: String,
         required: true
+    },
+    image: {
+        type: String,
+        default: null
     },
     subject: {
         type: String,

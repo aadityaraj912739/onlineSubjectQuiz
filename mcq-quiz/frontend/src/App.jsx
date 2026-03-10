@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -6,27 +6,30 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 
-// Components
+// Performance Optimization
+import PerformanceOptimizer from './components/PerformanceOptimizer.jsx';
+
+// Components (not lazy loaded - needed immediately)
 import Navbar from './components/Navbar.jsx';
 import Loading from './components/Loading.jsx';
 
-// Pages
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import RoleSelection from './pages/RoleSelection.jsx';
-import TeacherDashboard from './pages/TeacherDashboard.jsx';
-import StudentDashboard from './pages/StudentDashboard.jsx';
-import CreateExam from './pages/CreateExam.jsx';
-import TakeExam from './pages/TakeExam.jsx';
-import ExamResults from './pages/ExamResults.jsx';
-import Profile from './pages/Profile.jsx';
-import DetailedResult from './pages/DetailedResult.jsx';
-import StudyMaterials from './pages/StudyMaterials.jsx';
-import PreviousPapers from './pages/PreviousPapers.jsx';
-import ForumList from './pages/ForumList.jsx';
-import ForumThread from './pages/ForumThread.jsx';
-import UserProfile from './pages/UserProfile.jsx';
-import Contact from './pages/Contact.jsx';
+// Lazy load pages for better performance
+const Login = lazy(() => import('./pages/Login.jsx'));
+const Register = lazy(() => import('./pages/Register.jsx'));
+const RoleSelection = lazy(() => import('./pages/RoleSelection.jsx'));
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard.jsx'));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard.jsx'));
+const CreateExam = lazy(() => import('./pages/CreateExam.jsx'));
+const TakeExam = lazy(() => import('./pages/TakeExam.jsx'));
+const ExamResults = lazy(() => import('./pages/ExamResults.jsx'));
+const Profile = lazy(() => import('./pages/Profile.jsx'));
+const DetailedResult = lazy(() => import('./pages/DetailedResult.jsx'));
+const StudyMaterials = lazy(() => import('./pages/StudyMaterials.jsx'));
+const PreviousPapers = lazy(() => import('./pages/PreviousPapers.jsx'));
+const ForumList = lazy(() => import('./pages/ForumList.jsx'));
+const ForumThread = lazy(() => import('./pages/ForumThread.jsx'));
+const UserProfile = lazy(() => import('./pages/UserProfile.jsx'));
+const Contact = lazy(() => import('./pages/Contact.jsx'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -124,24 +127,25 @@ const AppContent = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-dark-950 transition-colors duration-200">
       {isAuthenticated && <Navbar />}
       
-      <Routes>
-        {/* Public Routes */}
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } 
-        />
-        <Route 
-          path="/register" 
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } 
-        />
+      <Suspense fallback={<Loading fullScreen text="Loading..." />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } 
+          />
 
         {/* Role Selection Route (Protected but no role required) */}
         <Route 
@@ -302,6 +306,7 @@ const AppContent = () => {
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
 
       {/* Toast notifications - Optimized & Responsive */}
       <Toaster
@@ -413,7 +418,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId || '156147048272-533837o45fjt5hcvskh3bh33nkc0hk72.apps.googleusercontent.com'}>
       <ThemeProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
             <NotificationProvider>
               <AppContent />

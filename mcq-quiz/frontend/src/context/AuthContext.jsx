@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, API_TIMEOUT } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   // Set up axios defaults
   axios.defaults.baseURL = API_BASE_URL;
+  axios.defaults.timeout = API_TIMEOUT;
   
   const fetchUser = async () => {
     try {

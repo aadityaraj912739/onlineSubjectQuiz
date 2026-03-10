@@ -3,6 +3,7 @@ const router = express.Router();
 const { auth } = require('../middleware/auth');
 const Forum = require('../models/Forum');
 const notificationService = require('../services/notificationService');
+const { uploadForumImage } = require('../config/cloudinary');
 
 // @route   GET /api/forums
 // @desc    Get all forum posts with filters
@@ -76,7 +77,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/forums
 // @desc    Create new forum post
 // @access  Private
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, uploadForumImage.single('image'), async (req, res) => {
     try {
         const { title, content, subject, tags } = req.body;
 
@@ -84,13 +85,20 @@ router.post('/', auth, async (req, res) => {
             return res.status(400).json({ message: 'Please provide content' });
         }
 
-        const forum = await Forum.create({
+        const forumData = {
             title: title || '',
             content,
             subject: subject || '',
-            tags: tags || [],
+            tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t)) : [],
             author: req.user.id
-        });
+        };
+
+        // Add image URL if file was uploaded
+        if (req.file) {
+            forumData.image = req.file.path;
+        }
+
+        const forum = await Forum.create(forumData);
 
         await forum.populate('author', 'name profileImage role');
 
@@ -104,7 +112,7 @@ router.post('/', auth, async (req, res) => {
 // @route   POST /api/forums/:id/reply
 // @desc    Add reply to forum post
 // @access  Private
-router.post('/:id/reply', auth, async (req, res) => {
+router.post('/:id/reply', auth, uploadForumImage.single('image'), async (req, res) => {
     try {
         const { content, parentReplyId } = req.body;
 
@@ -130,11 +138,18 @@ router.post('/:id/reply', auth, async (req, res) => {
             }
         }
 
-        forum.replies.push({
+        const replyData = {
             user: req.user.id,
             content,
             parentReply: parentReplyId || null
-        });
+        };
+
+        // Add image URL if file was uploaded
+        if (req.file) {
+            replyData.image = req.file.path;
+        }
+
+        forum.replies.push(replyData);
 
         await forum.save();
         await forum.populate('replies.user', 'name profileImage role');

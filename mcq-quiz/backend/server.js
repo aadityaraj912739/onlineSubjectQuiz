@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
+const helmet = require('helmet');
 const path = require('path');
 const detect = require('detect-port').default;
 const session = require('express-session');
@@ -15,8 +17,19 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
+// Security middleware
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false
+}));
+
+// Compression middleware for response compression
+app.use(compression());
+
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 app.use(cors({
     origin: [
         'http://localhost:3000',

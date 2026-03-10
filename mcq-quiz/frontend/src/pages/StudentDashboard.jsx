@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
@@ -7,8 +7,11 @@ import Tabs from '../components/Tabs.jsx';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { usePerformanceMonitor, VirtualList } from '../components/PerformanceOptimizer.jsx';
 
-const StudentDashboard = () => {
+const StudentDashboard = memo(() => {
+  usePerformanceMonitor('StudentDashboard');
+  
   const { user, api } = useAuth();
   const navigate = useNavigate();
   const [availableExams, setAvailableExams] = useState([]);
@@ -19,10 +22,40 @@ const StudentDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+  const fetchData = useCallback(async () => {
+    try {
+      // Load cached data first for instant display
+      const cachedExams = localStorage.getItem('student_exams');
+      const cachedResults = localStorage.getItem('student_results');
+      const cachedSummary = localStorage.getItem('student_summary');
+      
+      if (cachedExams && cachedResults && cachedSummary) {
+        setAvailableExams(JSON.parse(cachedExams));
+        setMyResults(JSON.parse(cachedResults));
+        setSummary(JSON.parse(cachedSummary));
+        setLoading(false);
+      }
+
+      // Fetch fresh data in background using RequestIdleCallback for non-blocking
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(async () => {
+          const [examsRes, resultsRes, summaryRes] = await Promise.all([
+            api.get('/exams/available'),
+            api.get('/results/my-results'),
+            api.get('/results/student/summary'),
+          ]);
+
+          // Update state and cache
+          setAvailableExams(examsRes.data);
+          setMyResults(resultsRes.data);
+          setSummary(summaryRes.data);
+          
+          localStorage.setItem('student_exams', JSON.stringify(examsRes.data));
+          localStorage.setItem('student_results', JSON.stringify(resultsRes.data));
+          localStorage.setItem('student_summary', JSON.stringify(summaryRes.data));
+        });
+      } else {
+        // Fallback for browsers without requestIdleCallback
         const [examsRes, resultsRes, summaryRes] = await Promise.all([
           api.get('/exams/available'),
           api.get('/results/my-results'),
@@ -32,14 +65,19 @@ const StudentDashboard = () => {
         setAvailableExams(examsRes.data);
         setMyResults(resultsRes.data);
         setSummary(summaryRes.data);
-
-      } catch (error) {
-        // Failed to fetch student data
-      } finally {
-        setLoading(false);
+        
+        localStorage.setItem('student_exams', JSON.stringify(examsRes.data));
+        localStorage.setItem('student_results', JSON.stringify(resultsRes.data));
+        localStorage.setItem('student_summary', JSON.stringify(summaryRes.data));
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch student data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [api]);
 
+  useEffect(() => {
     fetchData();
   }, [api]);
 
@@ -295,7 +333,9 @@ const StudentDashboard = () => {
       </div>
     </div>
   );
-};
+});
+
+StudentDashboard.displayName = 'StudentDashboard';
 
 const StatCard = ({ icon, title, value }) => {
   return (

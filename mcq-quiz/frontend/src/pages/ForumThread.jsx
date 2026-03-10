@@ -10,6 +10,8 @@ const ForumThread = () => {
     const [forum, setForum] = useState(null);
     const [loading, setLoading] = useState(true);
     const [replyContent, setReplyContent] = useState('');
+    const [replyImage, setReplyImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null); // Track which reply is being replied to
     const [expandedReplies, setExpandedReplies] = useState(new Set()); // Track which replies are expanded
@@ -80,6 +82,27 @@ const ForumThread = () => {
         }
     };
 
+    const handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Image size should be less than 5MB');
+                return;
+            }
+            if (!file.type.startsWith('image/')) {
+                toast.error('Please select an image file');
+                return;
+            }
+            setReplyImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeImage = () => {
+        setReplyImage(null);
+        setImagePreview(null);
+    };
+
     const handleReplySubmit = async (e) => {
         e.preventDefault();
 
@@ -95,18 +118,32 @@ const ForumThread = () => {
 
         try {
             setSubmitting(true);
+            
+            const formData = new FormData();
+            formData.append('content', replyContent);
+            if (replyingTo && !replyingTo.isMainPost) {
+                formData.append('parentReplyId', replyingTo._id);
+            }
+            if (replyImage) {
+                formData.append('image', replyImage);
+            }
+            
             const response = await axios.post(
                 `${API_URL}/api/forums/${id}/reply`,
+                formData,
                 { 
-                    content: replyContent,
-                    parentReplyId: (replyingTo && !replyingTo.isMainPost) ? replyingTo._id : null
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    } 
+                }
             );
 
             if (response.data.success) {
                 toast.success('Reply posted successfully!');
                 setReplyContent('');
+                setReplyImage(null);
+                setImagePreview(null);
                 setReplyingTo(null); // Clear replying state
                 fetchForum();
             }
@@ -218,7 +255,7 @@ const ForumThread = () => {
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => setReplyingTo(null)}
+                                    onClick={() => { setReplyingTo(null); removeImage(); }}
                                     className="flex-shrink-0 p-0.5 rounded text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,14 +279,49 @@ const ForumThread = () => {
                         maxLength={2000}
                         autoFocus
                     />
+
+                    {/* Image Preview */}
+                    {imagePreview && (
+                        <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700 mt-2">
+                            <img 
+                                src={imagePreview} 
+                                alt="Preview" 
+                                className="w-full max-h-64 object-contain bg-gray-100 dark:bg-dark-800"
+                            />
+                            <button
+                                type="button"
+                                onClick={removeImage}
+                                className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+
                     <div className="flex items-center justify-between mt-2">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {replyContent.length}/2000
-                        </p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {replyContent.length}/2000
+                            </p>
+                            {/* Image Upload Button */}
+                            <label className="cursor-pointer p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageSelect}
+                                    className="hidden"
+                                />
+                                <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </label>
+                        </div>
                         <div className="flex gap-2">
                             <button
                                 type="button"
-                                onClick={() => setReplyingTo(null)}
+                                onClick={() => { setReplyingTo(null); removeImage(); }}
                                 className="px-3 py-1.5 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors"
                             >
                                 Cancel
@@ -337,6 +409,17 @@ const ForumThread = () => {
                                 <p className="text-sm text-gray-900 dark:text-white mb-2 whitespace-pre-wrap leading-relaxed break-words">
                                     {reply.content}
                                 </p>
+
+                                {/* Reply Image */}
+                                {reply.image && (
+                                    <div className="mb-2 rounded-xl overflow-hidden border border-gray-200 dark:border-dark-700">
+                                        <img 
+                                            src={reply.image} 
+                                            alt="Reply" 
+                                            className="w-full max-h-80 object-cover"
+                                        />
+                                    </div>
+                                )}
 
                                 {/* Nested Replies Indicator */}
                                 {hasChildren && (
@@ -524,6 +607,17 @@ const ForumThread = () => {
                         <p className="text-sm sm:text-base text-gray-900 dark:text-white mb-3 whitespace-pre-wrap leading-relaxed break-words">
                             {forum.content}
                         </p>
+
+                        {/* Forum Image */}
+                        {forum.image && (
+                            <div className="mb-3 rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-700">
+                                <img 
+                                    src={forum.image} 
+                                    alt="Forum post" 
+                                    className="w-full max-h-96 object-cover"
+                                />
+                            </div>
+                        )}
 
                         {/* Tags */}
                         {forum.tags.length > 0 && (

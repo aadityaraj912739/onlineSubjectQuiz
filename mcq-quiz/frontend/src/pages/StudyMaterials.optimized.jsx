@@ -219,87 +219,14 @@ const StudyMaterials = memo(() => {
     setShowContentModal(true);
   };
 
-  const handleDownload = async (material) => {
-    try {
-      toast.loading('Preparing download...');
-      
-      // Backend now proxies the file and streams it directly
-      const token = localStorage.getItem('token');
-      const downloadUrl = `${BACKEND_URL}/api/study-materials/download/${material._id}`;
-      
-      const response = await fetch(downloadUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      // Check if response is JSON (error) or file stream (success)
-      const contentType = response.headers.get('content-type');
-      
-      if (!response.ok || contentType?.includes('application/json')) {
-        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
-        toast.dismiss();
-        
-        // Handle specific error cases
-        if (errorData.fileNotAvailable) {
-          if (errorData.requiresReupload) {
-            toast.error('⚠️ This file was uploaded before cloud storage migration and is no longer available. Please ask the teacher to re-upload it.', {
-              duration: 7000,
-              style: {
-                background: '#FEF3C7',
-                color: '#92400E',
-                fontWeight: '500'
-              }
-            });
-          } else {
-            toast.error('⚠️ File no longer available on server. Please contact the teacher to re-upload this file.', {
-              duration: 6000,
-              style: {
-                background: '#FEF3C7',
-                color: '#92400E',
-                fontWeight: '500'
-              }
-            });
-          }
-        } else {
-          toast.error(errorData.message || 'Download failed');
-        }
-        return;
-      }
-
-      toast.dismiss();
-      toast.loading('Downloading file...');
-      
-      // Get the file as blob
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      // Extract filename from Content-Disposition header or use default
-      const disposition = response.headers.get('Content-Disposition');
-      let fileName = `${material.title}.pdf`;
-      if (disposition && disposition.includes('filename=')) {
-        const match = disposition.match(/filename="?([^"]+)"?/);
-        if (match) fileName = match[1];
-      }
-      
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up blob URL
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
-      
-      toast.dismiss();
-      toast.success('Download completed! Check your downloads folder.');
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.dismiss();
-      toast.error(error.message || 'Failed to download file. Please try again.');
+  const handleDownload = (material) => {
+    if (material.fileUrl) {
+      const url = material.fileUrl.startsWith('http') 
+        ? material.fileUrl 
+        : `${BACKEND_URL}${material.fileUrl}`;
+      window.open(url, '_blank');
+    } else if (material.type === 'link') {
+      window.open(material.content, '_blank');
     }
   };
 
@@ -367,7 +294,7 @@ const StudyMaterials = memo(() => {
                     tags: ''
                   });
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors font-semibold text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all"
               >
                 <FaUpload className="text-sm" />
                 <span className="hidden sm:inline">Add Material</span>
@@ -403,7 +330,7 @@ const StudyMaterials = memo(() => {
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors font-medium text-sm relative"
+              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 transition-all relative"
             >
               <FaFilter className="text-sm" />
               <span>Filters</span>
@@ -494,7 +421,7 @@ const StudyMaterials = memo(() => {
         {/* Form */}
         {showForm && user?.role === 'teacher' && (
           <div className="mb-6 p-4 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-lg">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            <h3 className="text-lg font-bold mb-4">
               {editingId ? 'Edit Material' : 'Add New Material'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -504,7 +431,7 @@ const StudyMaterials = memo(() => {
                   placeholder="Title *"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                   required
                 />
                 <input
@@ -512,13 +439,13 @@ const StudyMaterials = memo(() => {
                   placeholder="Subject *"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                   required
                 />
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                 >
                   <option value="notes">Notes</option>
                   <option value="video">Video</option>
@@ -531,7 +458,7 @@ const StudyMaterials = memo(() => {
                   placeholder="Tags (comma separated)"
                   value={formData.tags}
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                 />
               </div>
 
@@ -539,7 +466,7 @@ const StudyMaterials = memo(() => {
                 placeholder="Description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                 rows="2"
               />
 
@@ -549,7 +476,7 @@ const StudyMaterials = memo(() => {
                   placeholder="Enter URL *"
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg bg-gray-50 dark:bg-dark-800"
                   required
                 />
               ) : (
@@ -557,10 +484,10 @@ const StudyMaterials = memo(() => {
                   <input
                     type="file"
                     onChange={handleFileSelect}
-                    className="block w-full text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                    className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                   />
                   {selectedFile && (
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-2 text-sm text-gray-600">
                       {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                     </p>
                   )}
@@ -574,14 +501,14 @@ const StudyMaterials = memo(() => {
                     setShowForm(false);
                     setEditingId(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 font-medium transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:opacity-50 font-semibold transition-colors"
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
                 >
                   {uploading ? 'Saving...' : editingId ? 'Update' : 'Create'}
                 </button>
@@ -597,7 +524,7 @@ const StudyMaterials = memo(() => {
               {materials.map((material) => (
                 <div
                   key={material._id}
-                  className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors cursor-pointer"
+                  className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-lg p-3 hover:border-primary-500 dark:hover:border-primary-500 transition-all hover:shadow-md"
                 >
                   {/* Header */}
                   <div className="flex items-start gap-2 mb-2">
@@ -647,7 +574,7 @@ const StudyMaterials = memo(() => {
                     {(material.fileUrl || material.type === 'link') && (
                       <button
                         onClick={() => handleDownload(material)}
-                        className="flex-1 px-3 py-1.5 bg-primary-500 text-white text-xs font-semibold rounded-full hover:bg-primary-600 transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 px-3 py-1.5 bg-primary-500 text-white text-xs font-medium rounded hover:bg-primary-600 transition-all flex items-center justify-center gap-1"
                       >
                         <FaDownload className="text-[10px]" />
                         <span>{material.type === 'link' ? 'Open' : 'Download'}</span>
@@ -656,7 +583,7 @@ const StudyMaterials = memo(() => {
                     {material.content && material.type !== 'link' && (
                       <button
                         onClick={() => handleView(material)}
-                        className="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded hover:bg-gray-200 dark:hover:bg-dark-700 transition-all flex items-center justify-center gap-1"
                       >
                         <FaEye className="text-[10px]" />
                         <span>View</span>
@@ -666,13 +593,13 @@ const StudyMaterials = memo(() => {
                       <>
                         <button
                           onClick={() => handleEdit(material)}
-                          className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+                          className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-all"
                         >
                           <FaEdit className="text-xs" />
                         </button>
                         <button
                           onClick={() => handleDelete(material._id)}
-                          className="px-2 py-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          className="px-2 py-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
                         >
                           <FaTrash className="text-xs" />
                         </button>
@@ -689,7 +616,7 @@ const StudyMaterials = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -711,10 +638,10 @@ const StudyMaterials = memo(() => {
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-full font-semibold transition-colors ${
+                        className={`w-10 h-10 rounded-lg font-medium transition-all ${
                           page === pageNum
                             ? 'bg-primary-500 text-white'
-                            : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-dark-800'
+                            : 'border border-gray-300 dark:border-dark-700 hover:bg-gray-100 dark:hover:bg-dark-800'
                         }`}
                       >
                         {pageNum}
@@ -726,7 +653,7 @@ const StudyMaterials = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-dark-700 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import Loading from '../components/Loading.jsx';
 import { formatRelativeTime, getExamStatus } from '../utils/helpers';
+import { usePerformanceMonitor } from '../components/PerformanceOptimizer.jsx';
 
-const TeacherDashboard = () => {
-  const { user } = useAuth();
+const TeacherDashboard = memo(() => {
+  usePerformanceMonitor('TeacherDashboard');
+  
+  const { user, api } = useAuth();
   const navigate = useNavigate();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,37 +34,84 @@ const TeacherDashboard = () => {
     toast.success('Exam key copied to clipboard!');
   };
 
-  const fetchExams = async () => {
+  const fetchExams = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('https://onlinesubjectquiz.onrender.com/api/exams/teacher', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const fetchedExams = response.data.exams;
-      setExams(fetchedExams);
+      // Load cached data first for instant display
+      const cachedExams = localStorage.getItem('teacher_exams');
+      const cachedStats = localStorage.getItem('teacher_stats');
       
-      // Calculate stats
-      const totalExams = fetchedExams.length;
-      const activeExams = fetchedExams.filter(exam => getExamStatus(exam).status === 'Active').length;
-      const totalParticipants = fetchedExams.reduce((sum, exam) => sum + (exam.participantCount || 0), 0);
-      
-      const examsWithScores = fetchedExams.filter(exam => exam.participantCount > 0);
-      const totalAverageScore = examsWithScores.reduce((sum, exam) => sum + parseFloat(exam.averageScore || 0), 0);
-      const averagePerformance = examsWithScores.length > 0 ? (totalAverageScore / examsWithScores.length) : 0;
+      if (cachedExams && cachedStats) {
+        setExams(JSON.parse(cachedExams));
+        setStats(JSON.parse(cachedStats));
+        setLoading(false);
+      }
 
-      setStats({
-        totalExams,
-        activeExams,
-        totalParticipants,
-        averagePerformance: averagePerformance.toFixed(2),
-      });
+      // Fetch fresh data in background using RequestIdleCallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(async () => {
+          const response = await api.get('/exams/teacher');
+          const fetchedExams = response.data.exams;
+          setExams(fetchedExams);
+      
+          // Calculate stats
+          const totalExams = fetchedExams.length;
+          const activeExams = fetchedExams.filter(exam => getExamStatus(exam).status === 'Active').length;
+          const totalParticipants = fetchedExams.reduce((sum, exam) => sum + (exam.participantCount || 0), 0);
+          
+          const examsWithScores = fetchedExams.filter(exam => exam.participantCount > 0);
+          const totalAverageScore = examsWithScores.reduce((sum, exam) => sum + parseFloat(exam.averageScore || 0), 0);
+          const averagePerformance = examsWithScores.length > 0 ? (totalAverageScore / examsWithScores.length) : 0;
+
+          const newStats = {
+            totalExams,
+            activeExams,
+            totalParticipants,
+            averagePerformance: averagePerformance.toFixed(2),
+          };
+
+          setStats(newStats);
+          
+          // Update cache
+          localStorage.setItem('teacher_exams', JSON.stringify(fetchedExams));
+          localStorage.setItem('teacher_stats', JSON.stringify(newStats));
+        });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        const response = await api.get('/exams/teacher');
+        const fetchedExams = response.data.exams;
+        setExams(fetchedExams);
+    
+        const totalExams = fetchedExams.length;
+        const activeExams = fetchedExams.filter(exam => getExamStatus(exam).status === 'Active').length;
+        const totalParticipants = fetchedExams.reduce((sum, exam) => sum + (exam.participantCount || 0), 0);
+        
+        const examsWithScores = fetchedExams.filter(exam => exam.participantCount > 0);
+        const totalAverageScore = examsWithScores.reduce((sum, exam) => sum + parseFloat(exam.averageScore || 0), 0);
+        const averagePerformance = examsWithScores.length > 0 ? (totalAverageScore / examsWithScores.length) : 0;
+
+        const newStats = {
+          totalExams,
+          activeExams,
+          totalParticipants,
+          averagePerformance: averagePerformance.toFixed(2),
+        };
+
+        setStats(newStats);
+        
+        localStorage.setItem('teacher_exams', JSON.stringify(fetchedExams));
+        localStorage.setItem('teacher_stats', JSON.stringify(newStats));
+      }
     } catch (error) {
-      // Error fetching exams
+      console.error('Error fetching exams:', error);
       toast.error('Failed to fetch exams. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [api]);
+
+  useEffect(() => {
+    fetchExams();
+  }, [fetchExams]);
 
   if (loading) {
     return (
@@ -218,6 +267,8 @@ const TeacherDashboard = () => {
       </div>
     </div>
   );
-};
+});
+
+TeacherDashboard.displayName = 'TeacherDashboard';
 
 export default TeacherDashboard;

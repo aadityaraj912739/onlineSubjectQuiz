@@ -15,7 +15,8 @@ const ForumList = () => {
 
     const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
 
-    const [newPost, setNewPost] = useState({ content: '', tags: '' });
+    const [newPost, setNewPost] = useState({ content: '', tags: '', image: null });
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         fetchForums();
@@ -38,6 +39,27 @@ const ForumList = () => {
         }
     };
 
+    const handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Image size should be less than 5MB');
+                return;
+            }
+            if (!file.type.startsWith('image/')) {
+                toast.error('Please select an image file');
+                return;
+            }
+            setNewPost({ ...newPost, image: file });
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeImage = () => {
+        setNewPost({ ...newPost, image: null });
+        setImagePreview(null);
+    };
+
     const handleCreatePost = async (e) => {
         e.preventDefault();
         
@@ -47,21 +69,29 @@ const ForumList = () => {
         }
 
         try {
-            const tagsArray = newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const formData = new FormData();
+            formData.append('content', newPost.content);
+            formData.append('tags', newPost.tags);
+            if (newPost.image) {
+                formData.append('image', newPost.image);
+            }
             
             const response = await axios.post(
                 `${API_URL}/api/forums`,
-                {
-                    content: newPost.content,
-                    tags: tagsArray
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
+                formData,
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    } 
+                }
             );
 
             if (response.data.success) {
                 toast.success('Forum post created successfully!');
                 setShowCreateModal(false);
-                setNewPost({ content: '', tags: '' });
+                setNewPost({ content: '', tags: '', image: null });
+                setImagePreview(null);
                 fetchForums();
             }
         } catch (error) {
@@ -203,6 +233,17 @@ const ForumList = () => {
                                                         {forum.content}
                                                     </p>
 
+                                                    {/* Forum Image */}
+                                                    {forum.image && (
+                                                        <div className="mb-3 rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-700">
+                                                            <img 
+                                                                src={forum.image} 
+                                                                alt="Forum post" 
+                                                                className="w-full max-h-96 object-cover"
+                                                            />
+                                                        </div>
+                                                    )}
+
                                                 {/* Tags */}
                                                 {forum.tags.length > 0 && (
                                                     <div className="flex flex-wrap gap-1.5 mb-3">
@@ -294,7 +335,27 @@ const ForumList = () => {
                                         maxLength={5000}
                                     />
 
-                                    {/* Tags Row */}
+                                    {/* Image Preview */}
+                                    {imagePreview && (
+                                        <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-700">
+                                            <img 
+                                                src={imagePreview} 
+                                                alt="Preview" 
+                                                className="w-full max-h-96 object-contain bg-gray-100 dark:bg-dark-800"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={removeImage}
+                                                className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-2 transition-colors"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Tags and Image Upload Row */}
                                     <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-dark-800">
                                         <input
                                             type="text"
@@ -303,6 +364,19 @@ const ForumList = () => {
                                             className="flex-1 border border-gray-300 dark:border-dark-700 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-transparent"
                                             placeholder="Tags (comma-separated)"
                                         />
+                                        
+                                        {/* Image Upload Button */}
+                                        <label className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer transition-colors">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageSelect}
+                                                className="hidden"
+                                            />
+                                            <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </label>
                                     </div>
 
                                     {/* Character Count */}
