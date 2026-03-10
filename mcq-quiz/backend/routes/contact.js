@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { optionalAuth } = require('../middleware/auth');
 const Contact = require('../models/Contact');
+const emailService = require('../services/emailService');
 
 // Admin email address
 const ADMIN_EMAIL = 'ar912739@gmail.com';
@@ -66,7 +67,6 @@ router.post('/', optionalAuth, async (req, res) => {
     setImmediate(async () => {
       try {
         console.log('[Contact] Attempting to send email notification (background)');
-        const emailService = require('../services/emailService');
         
         if (!emailService.transporter) {
           console.log('[Contact] Email service not configured, skipping email notification');
