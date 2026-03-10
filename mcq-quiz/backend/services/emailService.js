@@ -8,6 +8,12 @@ class EmailService {
 
     initializeTransporter() {
         // Check if email credentials are configured
+        console.log('📧 Initializing email service...');
+        console.log('📧 SMTP_HOST:', process.env.SMTP_HOST ? '✓ Set' : '✗ Missing');
+        console.log('📧 SMTP_USER:', process.env.SMTP_USER ? '✓ Set' : '✗ Missing');
+        console.log('📧 SMTP_PASS:', process.env.SMTP_PASS ? '✓ Set' : '✗ Missing');
+        console.log('📧 SMTP_PORT:', process.env.SMTP_PORT || '587 (default)');
+
         if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
             console.log('⚠️  Email service not configured - email notifications will be skipped');
             console.log('💡 Add SMTP credentials to .env to enable email notifications');
@@ -22,12 +28,27 @@ class EmailService {
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASS
+                },
+                tls: {
+                    rejectUnauthorized: true
                 }
             });
 
             console.log('✅ Email service initialized successfully');
+            console.log(`✅ Configured to send from: ${process.env.SMTP_USER}`);
+            
+            // Verify connection
+            this.transporter.verify((error, success) => {
+                if (error) {
+                    console.error('❌ SMTP Connection verification failed:', error.message);
+                    console.error('❌ Full error:', error);
+                } else {
+                    console.log('✅ SMTP server connection verified successfully');
+                }
+            });
         } catch (error) {
             console.error('❌ Failed to initialize email service:', error.message);
+            console.error('❌ Full error:', error);
         }
     }
 
@@ -38,6 +59,9 @@ class EmailService {
         }
 
         try {
+            console.log(`📧 Attempting to send email to: ${to}`);
+            console.log(`📧 Subject: ${subject}`);
+            
             const mailOptions = {
                 from: `"${process.env.APP_NAME || 'Quiz Platform'}" <${process.env.SMTP_USER}>`,
                 to,
@@ -47,10 +71,15 @@ class EmailService {
             };
 
             const info = await this.transporter.sendMail(mailOptions);
-            console.log('✅ Email sent successfully:', info.messageId);
+            console.log('✅ Email sent successfully!');
+            console.log('✅ Message ID:', info.messageId);
+            console.log('✅ Response:', info.response);
             return { success: true, messageId: info.messageId };
         } catch (error) {
-            console.error('❌ Failed to send email:', error.message);
+            console.error('❌ Failed to send email to:', to);
+            console.error('❌ Error message:', error.message);
+            console.error('❌ Error code:', error.code);
+            console.error('❌ Full error:', JSON.stringify(error, null, 2));
             return { success: false, error: error.message };
         }
     }

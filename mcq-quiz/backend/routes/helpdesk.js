@@ -308,12 +308,14 @@ Submitted: ${new Date().toLocaleString()}
                 });
 
                 if (result.success) {
-                    console.log('[HelpDesk] Email sent successfully');
+                    console.log('[HelpDesk] ✅ Email sent successfully:', result.messageId);
                 } else {
-                    console.error('[HelpDesk] Failed to send email:', result.error || result.message);
+                    console.error('[HelpDesk] ❌ Failed to send email:', result.error || result.message);
+                    console.error('[HelpDesk] ❌ Email was NOT sent to admin');
                 }
             } catch (emailError) {
-                console.error('[HelpDesk] Error sending email (non-fatal):', emailError.message);
+                console.error('[HelpDesk] ❌ Exception sending email (non-fatal):', emailError.message);
+                console.error('[HelpDesk] ❌ Stack:', emailError.stack);
             }
         });
     } catch (error) {
@@ -496,12 +498,14 @@ Replied At: ${new Date().toLocaleString()}
                     });
 
                     if (result.success) {
-                        console.log('[HelpDesk] Reply notification email sent successfully');
+                        console.log('[HelpDesk] ✅ Reply notification email sent successfully:', result.messageId);
                     } else {
-                        console.error('[HelpDesk] Failed to send reply notification email:', result.error || result.message);
+                        console.error('[HelpDesk] ❌ Failed to send reply notification email:', result.error || result.message);
+                        console.error('[HelpDesk] ❌ Reply email was NOT sent to admin');
                     }
                 } catch (emailError) {
-                    console.error('[HelpDesk] Error sending reply notification email (non-fatal):', emailError.message);
+                    console.error('[HelpDesk] ❌ Exception sending reply notification email (non-fatal):', emailError.message);
+                    console.error('[HelpDesk] ❌ Stack:', emailError.stack);
                 }
             });
         }

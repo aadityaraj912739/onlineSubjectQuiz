@@ -151,15 +151,17 @@ Submitted: ${new Date().toLocaleString()}
         });
 
         if (result.success) {
-          console.log('[Contact] Email sent successfully');
+          console.log('[Contact] ✅ Email sent successfully:', result.messageId);
           contactSubmission.emailSent = true;
           contactSubmission.emailSentAt = new Date();
           await contactSubmission.save();
         } else {
-          console.error('[Contact] Failed to send email:', result.error || result.message);
+          console.error('[Contact] ❌ Failed to send email:', result.error || result.message);
+          console.error('[Contact] ❌ Email was NOT sent to admin');
         }
       } catch (emailError) {
-        console.error('[Contact] Error sending email (non-fatal):', emailError.message);
+        console.error('[Contact] ❌ Exception sending email (non-fatal):', emailError.message);
+        console.error('[Contact] ❌ Stack:', emailError.stack);
       }
     });
 
