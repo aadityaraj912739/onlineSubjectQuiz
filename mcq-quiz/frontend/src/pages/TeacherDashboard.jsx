@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
@@ -19,10 +19,6 @@ const TeacherDashboard = memo(() => {
     totalStudents: 0,
     averagePerformance: 0,
   });
-
-  useEffect(() => {
-    fetchExams();
-  }, []);
 
   const copyExamKey = (examKey) => {
     const tempInput = document.createElement('input');

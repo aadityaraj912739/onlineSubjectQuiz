@@ -11,6 +11,10 @@ const Navbar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Debug logging
+  console.log('[Navbar] Rendered with user:', user);
+  console.log('[Navbar] user.profileImage:', user?.profileImage);
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -99,19 +103,26 @@ const Navbar = () => {
               className="hidden md:flex items-center gap-2.5 pl-2.5 pr-3 py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800/80 transition-all duration-200 ease-in-out group"
               aria-label="Go to profile"
             >
-              {user?.profileImage ? (
+              {(user?.profileImage && user.profileImage !== '') ? (
                 <img
                   src={user.profileImage}
-                  alt={user.name}
+                  alt={user?.name || 'Profile'}
                   className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary-400/50 transition-all duration-200"
+                  onError={(e) => {
+                    console.log('[Navbar] Image load error, showing fallback avatar');
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
                 />
-              ) : (
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-200">
-                  <span className="text-white font-semibold text-sm">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              ) : null}
+              <div 
+                className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-200"
+                style={{ display: (user?.profileImage && user.profileImage !== '') ? 'none' : 'flex' }}
+              >
+                <span className="text-white font-semibold text-sm">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
               <span className="text-sm font-bold text-gray-900 dark:text-white hidden lg:block group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                 {user?.name}
               </span>

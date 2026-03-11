@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
 import toast from 'react-hot-toast';
 import { FaSearch, FaTimes, FaFilter, FaDownload, FaTrash, FaUpload, FaBook, FaFileAlt, FaVideo, FaLink, FaTag, FaEye, FaEdit } from 'react-icons/fa';
-import { usePerformanceMonitor, useDebounce, LazyImage } from '../components/PerformanceOptimizer.jsx';
+import { usePerformanceMonitor, useDebounce } from '../components/PerformanceOptimizer.jsx';
 import { BACKEND_URL } from '../config/api.js';
 
 const StudyMaterials = memo(() => {
@@ -93,6 +93,7 @@ const StudyMaterials = memo(() => {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, user.role, page, filters, debouncedSearch]);
 
   useEffect(() => {
@@ -107,31 +108,6 @@ const StudyMaterials = memo(() => {
         return;
       }
       setSelectedFile(file);
-    }
-  };
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) {
-      toast.error('Please select a file first');
-      return;
-    }
-
-    try {
-      setUploading(true);
-      const formDataFile = new FormData();
-      formDataFile.append('file', selectedFile);
-
-      const response = await api.post('/study-materials/upload', formDataFile, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      setFormData({ ...formData, fileUrl: response.data.fileUrl });
-      toast.success('File uploaded successfully!');
-      setSelectedFile(null);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to upload file');
-    } finally {
-      setUploading(false);
     }
   };
 

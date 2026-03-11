@@ -2,8 +2,8 @@ import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
 import toast from 'react-hot-toast';
-import { FaSearch, FaTimes, FaFilter, FaDownload, FaTrash, FaUpload, FaFileAlt, FaCalendar, FaBook, FaGraduationCap, FaMapMarkerAlt } from 'react-icons/fa';
-import { usePerformanceMonitor, VirtualList, useDebounce } from '../components/PerformanceOptimizer.jsx';
+import { FaSearch, FaTimes, FaFilter, FaDownload, FaTrash, FaUpload, FaFileAlt, FaCalendar, FaBook, FaGraduationCap } from 'react-icons/fa';
+import { usePerformanceMonitor, useDebounce } from '../components/PerformanceOptimizer.jsx';
 import { BACKEND_URL } from '../config/api.js';
 
 const PreviousPapers = memo(() => {
@@ -105,6 +105,7 @@ const PreviousPapers = memo(() => {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, page, filters, debouncedSearch]);
 
   useEffect(() => {

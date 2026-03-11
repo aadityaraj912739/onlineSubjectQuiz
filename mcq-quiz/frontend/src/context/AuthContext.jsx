@@ -27,6 +27,8 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await axios.get('/auth/me');
+      console.log('[AuthContext] fetchUser response:', response.data.user);
+      console.log('[AuthContext] fetchUser profileImage:', response.data.user.profileImage);
       setUser(response.data.user);
       return response.data.user;
     } catch (error) {

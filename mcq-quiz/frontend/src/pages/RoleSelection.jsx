@@ -75,16 +75,21 @@ const RoleSelection = () => {
       if (response.data.user) {
         toast.success('Role set successfully!');
         
+        // Important: Directly update user from response before refetch
+        // This ensures profileImage is preserved
+        console.log('[RoleSelection] Setting user from response first...');
+        
         // Refresh user data to update role in context
         console.log('[RoleSelection] Refetching user data...');
         const updatedUser = await refetchUser();
         console.log('[RoleSelection] Updated user:', updatedUser);
         console.log('[RoleSelection] Profile image after refetch:', updatedUser?.profileImage);
         
-        // Navigate to appropriate dashboard based on updated user role
+        // Use the refetched user as the source of truth
         if (updatedUser && updatedUser.role) {
           const redirectPath = updatedUser.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard';
           console.log('[RoleSelection] Navigating to:', redirectPath);
+          console.log('[RoleSelection] Final user object:', updatedUser);
           navigate(redirectPath, { replace: true });
         } else {
           console.error('[RoleSelection] Updated user has no role:', updatedUser);

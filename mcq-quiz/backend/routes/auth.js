@@ -265,28 +265,35 @@ router.post('/google/set-role', auth, async (req, res) => {
             user.semester = semester || '';
         }
 
+        console.log('[SET-ROLE] Before save - Profile Image:', user.profileImage);
         await user.save();
+        console.log('[SET-ROLE] After save - Profile Image:', user.profileImage);
+
+        const responseUser = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            department: user.department,
+            rollNumber: user.rollNumber,
+            class: user.class,
+            profileImage: user.profileImage,
+            linkedin: user.linkedin,
+            leetcode: user.leetcode,
+            github: user.github,
+            country: user.country,
+            state: user.state,
+            college: user.college,
+            branch: user.branch,
+            semester: user.semester
+        };
+
+        console.log('[SET-ROLE] Response user object:', responseUser);
+        console.log('[SET-ROLE] Response profileImage:', responseUser.profileImage);
 
         res.json({
             message: 'Role set successfully',
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                department: user.department,
-                rollNumber: user.rollNumber,
-                class: user.class,
-                profileImage: user.profileImage,
-                linkedin: user.linkedin,
-                leetcode: user.leetcode,
-                github: user.github,
-                country: user.country,
-                state: user.state,
-                college: user.college,
-                branch: user.branch,
-                semester: user.semester
-            }
+            user: responseUser
         });
     } catch (error) {
         console.error('Set role error:', error);
@@ -299,25 +306,33 @@ router.post('/google/set-role', auth, async (req, res) => {
 // @access  Private
 router.get('/me', auth, async (req, res) => {
     try {
+        console.log('[AUTH-ME] req.user:', req.user);
+        console.log('[AUTH-ME] profileImage:', req.user.profileImage);
+        
+        const responseUser = {
+            id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            role: req.user.role,
+            department: req.user.department,
+            rollNumber: req.user.rollNumber,
+            class: req.user.class,
+            profileImage: req.user.profileImage,
+            linkedin: req.user.linkedin,
+            leetcode: req.user.leetcode,
+            github: req.user.github,
+            country: req.user.country,
+            state: req.user.state,
+            college: req.user.college,
+            branch: req.user.branch,
+            semester: req.user.semester
+        };
+        
+        console.log('[AUTH-ME] Sending response:', responseUser);
+        console.log('[AUTH-ME] Response profileImage:', responseUser.profileImage);
+        
         res.json({
-            user: {
-                id: req.user._id,
-                name: req.user.name,
-                email: req.user.email,
-                role: req.user.role,
-                department: req.user.department,
-                rollNumber: req.user.rollNumber,
-                class: req.user.class,
-                profileImage: req.user.profileImage,
-                linkedin: req.user.linkedin,
-                leetcode: req.user.leetcode,
-                github: req.user.github,
-                country: req.user.country,
-                state: req.user.state,
-                college: req.user.college,
-                branch: req.user.branch,
-                semester: req.user.semester
-            }
+            user: responseUser
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });

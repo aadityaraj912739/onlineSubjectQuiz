@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Loading from '../components/Loading.jsx';
@@ -7,7 +7,7 @@ import Tabs from '../components/Tabs.jsx';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import { usePerformanceMonitor, VirtualList } from '../components/PerformanceOptimizer.jsx';
+import { usePerformanceMonitor } from '../components/PerformanceOptimizer.jsx';
 
 const StudentDashboard = memo(() => {
   usePerformanceMonitor('StudentDashboard');
@@ -79,7 +79,8 @@ const StudentDashboard = memo(() => {
 
   useEffect(() => {
     fetchData();
-  }, [api]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleExamClick = (exam) => {
     const hasTaken = myResults.some(result => result.exam._id === exam._id);

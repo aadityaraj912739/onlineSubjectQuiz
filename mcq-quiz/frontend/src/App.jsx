@@ -6,9 +6,6 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 
-// Performance Optimization
-import PerformanceOptimizer from './components/PerformanceOptimizer.jsx';
-
 // Components (not lazy loaded - needed immediately)
 import Navbar from './components/Navbar.jsx';
 import Loading from './components/Loading.jsx';
