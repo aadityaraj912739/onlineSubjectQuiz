@@ -5,6 +5,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
+import { LayoutProvider } from './context/LayoutContext.jsx';
+import { UserTypeProvider } from './context/UserTypeContext.jsx';
 
 // Components (not lazy loaded - needed immediately)
 import Navbar from './components/Navbar.jsx';
@@ -418,7 +420,11 @@ function App() {
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
             <NotificationProvider>
-              <AppContent />
+              <LayoutProvider>
+                <UserTypeProvider>
+                  <AppContent />
+                </UserTypeProvider>
+              </LayoutProvider>
             </NotificationProvider>
           </AuthProvider>
         </Router>

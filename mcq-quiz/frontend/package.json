@@ -2,6 +2,16 @@
   "name": "mcq-quiz-frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./context/*": "./src/context/*",
+    "./components/*": "./src/components/*",
+    "./pages/*": "./src/pages/*",
+    "./utils/*": "./src/utils/*",
+    "./config/*": "./src/config/*"
+  },
   "dependencies": {
     "@react-oauth/google": "^0.13.4",
     "@testing-library/jest-dom": "^5.17.0",
